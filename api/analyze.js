@@ -1,7 +1,7 @@
 // Vercel Serverless Function – proxy mot Claude API.
 // API-nyckeln ligger som miljövariabel (ANTHROPIC_API_KEY) och lämnar aldrig servern.
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
