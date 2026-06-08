@@ -642,6 +642,7 @@ VIKTIGT OM TYPOGRAFI: Använd ALDRIG långt tankstreck (em-dash, Unicode U+2014)
     const rawText = data.text || 'Analysen kunde inte genereras.';
     const text = stripEmDash(rawText);
     aiRawText = text;
+    fetch('/api/save-result',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'Hogan',test_type:'Hogan',report:text})});
     document.getElementById('aiBody').innerHTML = formatAI(text);
   } catch(e) {
     document.getElementById('aiBody').innerHTML = '<p style="color:#bf7c7c">Kunde inte nå AI-tjänsten. Kontrollera att API-nyckeln är giltig.</p>';

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sparade rapporter</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; background: #f9f9f9; color: #222; }
+  h1 { font-size: 24px; margin-bottom: 24px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+  th { background: #222; color: #fff; text-align: left; padding: 12px 16px; font-size: 13px; }
+  td { padding: 12px 16px; border-bottom: 1px solid #eee; font-size: 14px; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f5f5f5; }
+  .report-text { max-height: 80px; overflow: hidden; white-space: pre-wrap; cursor: pointer; color: #555; }
+  .report-text.expanded { max-height: none; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 100px; font-size: 12px; font-weight: 600; background: #e8f0fe; color: #1a56db; }
+  .loading { color: #999; padding: 40px 0; text-align: center; }
+  .error { color: #c00; padding: 20px 0; }
+</style>
+</head>
+<body>
+<h1>Sparade rapporter</h1>
+<div id="content" class="loading">Laddar...</div>
+
+<script>
+async function load() {
+  const el = document.getElementById('content');
+  try {
+    const res = await fetch('/api/results');
+    const rows = await res.json();
+    if (!rows.length) { el.innerHTML = '<p>Inga rapporter sparade ännu.</p>'; return; }
+
+    const html = `<table>
+      <thead><tr><th>#</th><th>Namn</th><th>Test</th><th>Datum</th><th>Rapport</th></tr></thead>
+      <tbody>${rows.map((r, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${esc(r.name)}</td>
+          <td><span class="badge">${esc(r.test_type)}</span></td>
+          <td>${new Date(r.created_at).toLocaleString('sv-SE')}</td>
+          <td><div class="report-text" onclick="this.classList.toggle('expanded')">${esc(r.report)}</div></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = `<p class="error">Kunde inte hämta rapporter: ${e.message}</p>`;
+  }
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+load();
+</script>
+</body>
+</html>
