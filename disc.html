@@ -545,14 +545,7 @@ async function showResults(){
 }
 
 async function fetchAIAnalysis(scores){
-  if(!apiKey){
-    document.getElementById('ai-loading').style.display='none';
-    const errEl=document.getElementById('ai-error');
-    errEl.style.display='block';
-    errEl.textContent='Ingen API-nyckel angiven – AI-analys hoppas över.';
-    document.getElementById('btn-pdf').disabled=false;
-    return;
-  }
+
   const ordered=Object.entries(scores).sort((a,b)=>b[1]-a[1]);
   const primary=traitMeta[ordered[0][0]].name, secondary=traitMeta[ordered[1][0]].name;
   const prompt=`Du är en certifierad DISC-konsult och organisationspsykolog med över 20 års erfarenhet av beteendeanalys, ledarskapsutveckling och teamcoachning. Du kombinerar vetenskaplig precision med värme och ärlighet.

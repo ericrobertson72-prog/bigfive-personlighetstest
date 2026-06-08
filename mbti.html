@@ -583,14 +583,7 @@ async function showResults(){
 }
 
 async function fetchAIAnalysis(scores,type){
-  if(!apiKey){
-    document.getElementById('ai-loading').style.display='none';
-    const errEl=document.getElementById('ai-error');
-    errEl.style.display='block';
-    errEl.textContent='Ingen API-nyckel angiven – AI-analys hoppas över.';
-    document.getElementById('btn-pdf').disabled=false;
-    return;
-  }
+
   const t=mbtiTypes[type.code];
   const prefLines=dichOrder.map(k=>{
     const m=dichMeta[k], p=type.prefs[k];

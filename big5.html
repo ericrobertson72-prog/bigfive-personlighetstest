@@ -562,14 +562,7 @@ async function showResults(){
 }
 
 async function fetchAIAnalysis(scores){
-  if(!apiKey){
-    document.getElementById('ai-loading').style.display='none';
-    const errEl=document.getElementById('ai-error');
-    errEl.style.display='block';
-    errEl.textContent='Ingen API-nyckel angiven – AI-analys hoppas över. Fyll i din Anthropic API-nyckel på startsidan för att aktivera analysen.';
-    document.getElementById('btn-pdf').disabled=false;
-    return;
-  }
+
   const prompt=`Du är leg. psykolog och senior personlighetskonsult med över 20 års erfarenhet av djupintervjuer, ledarskapscoachning och personlighetspsykologi baserad på Big Five-modellen (OCEAN). Du kombinerar vetenskaplig precision med värme och ärlighet.
 
 Klientens namn: ${userName}
