@@ -1,0 +1,13 @@
+{
+  "name": "personlighetstester",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Personlighetstester (Big Five, DISC, MBTI, HOGAN) med AI-analys",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "devDependencies": {
+    "vercel": "^44.0.0"
+  }
+}

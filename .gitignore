@@ -1,0 +1,15 @@
+# Hemligheter – får ALDRIG committas
+.dev.vars
+.env
+*.env.local
+*.local
+
+# Beroenden & byggartefakter
+node_modules/
+.vercel/
+dist/
+
+# Editor / OS
+.DS_Store
+*.swp
+.claude/

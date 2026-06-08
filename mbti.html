@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Myers-Briggs Personlighetstyp</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg:#0f0e17;--surface:#1a1928;--surface2:#22213a;--border:rgba(255,255,255,0.08);
+    --accent:#c9a84c;--accent2:#e8c97a;--text:#f0eee8;--muted:#8b8a9e;
+    --EI:#9b7cbf;--SN:#c9a84c;--TF:#bf7c9b;--JP:#7bbf9b;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background:
+    radial-gradient(ellipse at 20% 50%,rgba(155,124,191,0.06) 0%,transparent 60%),
+    radial-gradient(ellipse at 80% 20%,rgba(201,168,76,0.05) 0%,transparent 50%),
+    radial-gradient(ellipse at 60% 80%,rgba(191,124,155,0.05) 0%,transparent 50%);
+    pointer-events:none;z-index:0;}
+  .container{max-width:720px;margin:0 auto;padding:40px 24px 80px;position:relative;z-index:1;}
+
+  /* INTRO SCREEN */
+  #intro-screen{animation:fadeUp 0.6s ease both;}
+  .intro-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:40px 44px;text-align:center;}
+  .intro-card h2{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;margin-bottom:10px;}
+  .intro-card p{font-size:15px;color:var(--muted);line-height:1.65;margin-bottom:32px;max-width:440px;margin-left:auto;margin-right:auto;}
+  .name-label{display:block;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;text-align:left;}
+  .name-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 18px;font-family:'DM Sans',sans-serif;font-size:16px;color:var(--text);outline:none;transition:border-color 0.2s;margin-bottom:28px;}
+  .name-input::placeholder{color:var(--muted);}
+  .name-input:focus{border-color:rgba(201,168,76,0.4);}
+  .btn-start{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#1a1200;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;padding:16px 48px;border:none;border-radius:100px;cursor:pointer;letter-spacing:0.05em;transition:transform 0.15s,box-shadow 0.15s,opacity 0.2s;box-shadow:0 4px 24px rgba(201,168,76,0.3);width:100%;}
+  .btn-start:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(201,168,76,0.4);}
+  .btn-start:disabled{opacity:0.4;transform:none;cursor:not-allowed;box-shadow:none;}
+
+  .header{text-align:center;margin-bottom:48px;animation:fadeUp 0.6s ease both;}
+  .header-badge{display:inline-block;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);border:1px solid rgba(201,168,76,0.3);padding:6px 16px;border-radius:100px;margin-bottom:20px;}
+  h1{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,6vw,52px);font-weight:600;line-height:1.1;color:var(--text);margin-bottom:14px;}
+  h1 span{color:var(--accent);}
+  .subtitle{font-size:15px;color:var(--muted);line-height:1.6;max-width:480px;margin:0 auto;}
+
+  .progress-wrap{margin-bottom:36px;animation:fadeUp 0.6s ease 0.1s both;}
+  .progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .progress-label{font-size:12px;color:var(--muted);letter-spacing:0.05em;}
+  .progress-count{font-size:13px;font-weight:500;color:var(--accent);}
+  .progress-track{height:3px;background:var(--surface2);border-radius:2px;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 0.4s cubic-bezier(0.4,0,0.2,1);width:0%;}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px 36px;margin-bottom:20px;animation:fadeUp 0.5s ease both;transition:border-color 0.2s;}
+  .card:hover{border-color:rgba(255,255,255,0.14);}
+  .card-meta{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+  .trait-chip{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;font-weight:500;padding:4px 10px;border-radius:100px;}
+  .q-number{font-size:12px;color:var(--muted);}
+  .question-text{font-size:17px;line-height:1.55;color:var(--text);margin-bottom:28px;font-weight:400;}
+  .slider-labels{display:flex;justify-content:space-between;margin-bottom:10px;}
+  .slider-labels span{font-size:11px;color:var(--muted);}
+  input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:3px;background:var(--surface2);outline:none;cursor:pointer;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--accent);cursor:pointer;border:3px solid var(--bg);box-shadow:0 0 0 2px var(--accent);transition:transform 0.15s,box-shadow 0.15s;}
+  input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15);box-shadow:0 0 0 4px rgba(201,168,76,0.25);}
+  .slider-value{text-align:center;margin-top:12px;font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--accent);min-height:36px;}
+  .slider-value.untouched{color:var(--muted);font-size:14px;font-family:'DM Sans',sans-serif;}
+
+  .section-header{display:flex;align-items:center;gap:14px;margin:48px 0 24px;animation:fadeUp 0.5s ease both;}
+  .section-line{flex:1;height:1px;background:var(--border);}
+  .section-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--text);white-space:nowrap;}
+  .section-icon{font-size:18px;}
+
+  .submit-area{text-align:center;margin-top:48px;animation:fadeUp 0.5s ease both;}
+  .btn-submit{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#1a1200;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;padding:16px 48px;border:none;border-radius:100px;cursor:pointer;letter-spacing:0.05em;transition:transform 0.15s,box-shadow 0.15s,opacity 0.2s;box-shadow:0 4px 24px rgba(201,168,76,0.3);}
+  .btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(201,168,76,0.4);}
+  .btn-submit:disabled{opacity:0.45;transform:none;cursor:not-allowed;box-shadow:none;}
+  .btn-hint{font-size:12px;color:var(--muted);margin-top:10px;}
+
+  #results{display:none;}
+  .results-header{text-align:center;margin-bottom:48px;animation:fadeUp 0.6s ease both;}
+  .results-header h2{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;margin-bottom:10px;}
+  .results-header p{font-size:15px;color:var(--muted);line-height:1.6;}
+
+  .trait-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 28px;margin-bottom:14px;animation:fadeUp 0.5s ease both;}
+  .trait-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+  .trait-name{display:flex;align-items:center;gap:10px;}
+  .trait-name strong{font-size:15px;font-weight:500;}
+  .trait-name .emoji{font-size:18px;}
+  .trait-score{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;}
+  .trait-desc{font-size:13px;color:var(--muted);line-height:1.5;margin-top:14px;}
+
+  /* MBTI spectrum bar */
+  .spectrum-poles{display:flex;justify-content:space-between;margin-bottom:9px;}
+  .spectrum-poles span{font-size:11px;color:var(--muted);}
+  .spectrum-poles span.active{color:var(--text);font-weight:500;}
+  .spectrum-track{position:relative;height:8px;background:var(--surface2);border-radius:4px;}
+  .spectrum-mid{position:absolute;left:50%;top:-4px;bottom:-4px;width:1px;background:var(--border);}
+  .spectrum-marker{position:absolute;top:50%;left:50%;width:18px;height:18px;border-radius:50%;transform:translate(-50%,-50%);border:3px solid var(--bg);transition:left 1s cubic-bezier(0.4,0,0.2,1);}
+
+  .insight-result{background:linear-gradient(135deg,rgba(201,168,76,0.1),rgba(201,168,76,0.04));border:1px solid rgba(201,168,76,0.25);border-radius:var(--radius);padding:32px 28px;margin-bottom:14px;animation:fadeUp 0.5s ease both;text-align:center;}
+  .insight-result h3{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--accent);margin-bottom:6px;}
+  .insight-big-score{font-family:'Cormorant Garamond',serif;font-size:72px;font-weight:700;color:var(--accent);line-height:1;margin:8px 0;letter-spacing:0.08em;}
+  .insight-label{font-size:20px;font-weight:500;margin-bottom:12px;}
+  .insight-desc{font-size:14px;color:var(--muted);line-height:1.6;max-width:520px;margin:0 auto 14px;}
+  .insight-code{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;}
+  .insight-code span{font-size:12px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:4px 12px;border-radius:100px;}
+
+  /* AI */
+  .ai-section{margin-top:40px;animation:fadeUp 0.5s ease both;}
+  .ai-header{display:flex;align-items:center;gap:14px;margin-bottom:24px;}
+  .ai-badge{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);border:1px solid rgba(201,168,76,0.3);padding:6px 14px;border-radius:100px;}
+  .ai-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 1.5s ease-in-out infinite;}
+  .ai-card{background:linear-gradient(135deg,rgba(155,124,191,0.07),rgba(191,124,155,0.05));border:1px solid rgba(155,124,191,0.18);border-radius:var(--radius);padding:32px 36px;position:relative;overflow:hidden;}
+  .ai-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--EI),var(--SN),var(--TF),var(--JP));}
+  .ai-loading{display:flex;flex-direction:column;align-items:center;gap:20px;padding:40px 0;}
+  .ai-loading-text{font-size:14px;color:var(--muted);text-align:center;line-height:1.6;}
+  .ai-spinner{width:48px;height:48px;border:2px solid rgba(201,168,76,0.15);border-top-color:var(--accent);border-radius:50%;animation:spin 0.9s linear infinite;}
+  .ai-dots span{display:inline-block;animation:blink 1.4s infinite both;}
+  .ai-dots span:nth-child(2){animation-delay:0.2s;}
+  .ai-dots span:nth-child(3){animation-delay:0.4s;}
+  .ai-content{display:none;}
+  .ai-content h4{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--accent);margin:28px 0 10px;}
+  .ai-content h4:first-child{margin-top:0;}
+  .ai-content p{font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:12px;}
+  .ai-content strong{color:var(--text);font-weight:500;}
+  .ai-content ul{list-style:none;padding:0;margin:0 0 12px;}
+  .ai-content ul li{font-size:14px;color:var(--muted);line-height:1.7;padding:6px 0 6px 20px;position:relative;border-bottom:1px solid var(--border);}
+  .ai-content ul li:last-child{border-bottom:none;}
+  .ai-content ul li::before{content:'→';position:absolute;left:0;color:var(--accent);font-size:12px;top:8px;}
+  .ai-error{font-size:14px;color:#bf7c7c;text-align:center;padding:20px 0;}
+
+  /* PDF & Reset buttons */
+  .action-row{display:flex;justify-content:center;gap:14px;margin-top:36px;flex-wrap:wrap;}
+  .btn-pdf{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#1a1200;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;padding:13px 32px;border:none;border-radius:100px;cursor:pointer;letter-spacing:0.05em;transition:transform 0.15s,box-shadow 0.15s,opacity 0.2s;box-shadow:0 4px 20px rgba(201,168,76,0.3);}
+  .btn-pdf:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(201,168,76,0.4);}
+  .btn-pdf:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+  .btn-reset{background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:14px;padding:13px 32px;border:1px solid var(--border);border-radius:100px;cursor:pointer;transition:border-color 0.2s,color 0.2s;}
+  .btn-reset:hover{border-color:rgba(255,255,255,0.2);color:var(--text);}
+
+  /* PDF Overlay */
+  #pdf-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(10,9,20,0.92);overflow-y:auto;padding:30px 20px;}
+  .pdf-modal{background:#fff;color:#1a1928;max-width:760px;margin:0 auto;border-radius:12px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,0.6);}
+  .pdf-topbar{background:#1a1928;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;}
+  .pdf-topbar span{font-size:13px;color:#8b8a9e;}
+  .pdf-actions{display:flex;gap:10px;}
+  .btn-print{background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#1a1200;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:9px 22px;border:none;border-radius:100px;cursor:pointer;}
+  .btn-close-pdf{background:transparent;color:#8b8a9e;font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 18px;border:1px solid rgba(255,255,255,0.1);border-radius:100px;cursor:pointer;}
+  .btn-close-pdf:hover{color:#f0eee8;border-color:rgba(255,255,255,0.25);}
+  .pdf-body{padding:48px 56px 56px;font-family:'DM Sans',sans-serif;font-size:12px;line-height:1.65;}
+  .pdf-header{background:#0f0e17;color:#f0eee8;padding:26px 30px;border-radius:8px;margin-bottom:28px;}
+  .pdf-header h1{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:#c9a84c;margin-bottom:4px;}
+  .pdf-header p{font-size:11px;color:#8b8a9e;}
+  .pdf-section-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:#0f0e17;margin:26px 0 12px;padding-bottom:6px;border-bottom:2px solid #c9a84c;}
+  .pdf-score-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+  .pdf-score-name{width:170px;font-size:11px;color:#444;flex-shrink:0;}
+  .pdf-score-bar-wrap{flex:1;height:8px;background:#e8e6f0;border-radius:4px;overflow:hidden;}
+  .pdf-score-bar{height:100%;border-radius:4px;transition:width 0.6s ease;}
+  .pdf-score-val{width:48px;text-align:right;font-weight:600;font-size:13px;flex-shrink:0;}
+  .pdf-analysis h3{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:600;color:#c9a84c;margin:22px 0 7px;}
+  .pdf-analysis p{font-size:11.5px;color:#333;line-height:1.72;margin-bottom:8px;}
+  .pdf-analysis ul{padding-left:18px;margin-bottom:8px;}
+  .pdf-analysis li{font-size:11.5px;color:#333;line-height:1.7;margin-bottom:4px;}
+  .pdf-analysis strong{color:#1a1928;font-weight:600;}
+  .pdf-footer{margin-top:36px;padding-top:12px;border-top:1px solid #ddd;font-size:10px;color:#aaa;display:flex;justify-content:space-between;}
+
+  @media print{
+    .container{display:none!important;}
+    body::before{display:none!important;}
+    #pdf-overlay{display:block!important;position:static!important;background:none!important;padding:0!important;}
+    .pdf-topbar{display:none!important;}
+    .pdf-modal{box-shadow:none!important;border-radius:0!important;}
+    .pdf-body{padding:20px 30px!important;}
+    .pdf-header{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .pdf-score-bar{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .pdf-section-title{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  }
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+  @keyframes blink{0%,80%,100%{opacity:0;}40%{opacity:1;}}
+
+  .chip-EI{background:rgba(155,124,191,0.18);color:var(--EI);}
+  .chip-SN{background:rgba(201,168,76,0.18);color:var(--SN);}
+  .chip-TF{background:rgba(191,124,155,0.18);color:var(--TF);}
+  .chip-JP{background:rgba(123,191,155,0.18);color:var(--JP);}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- INTRO / NAMNFRÅGA -->
+  <div id="intro-screen">
+    <div class="header">
+      <div class="header-badge">Personlighetstyp</div>
+      <h1>Myers-Briggs<br><span>Personlighetstyp</span></h1>
+      <p class="subtitle">20 frågor. Svara ärligt utifrån hur du naturligt är – inte hur du är på jobbet eller hur du önskar att du vore.</p>
+    </div>
+    <div class="intro-card">
+      <h2>Innan vi börjar</h2>
+      <p>Ange ditt namn så att din rapport kan personaliseras. Namnet används enbart i din nedladdningsbara PDF.</p>
+      <label class="name-label" for="user-name">Ditt namn</label>
+      <input class="name-input" id="user-name" type="text" placeholder="Förnamn Efternamn" oninput="checkName()" onkeydown="if(event.key==='Enter')startTest()">
+      <button class="btn-start" id="btn-start" onclick="startTest()" disabled>Starta testet →</button>
+    </div>
+  </div>
+
+  <!-- FORMULÄR -->
+  <div id="form-section" style="display:none;">
+    <div class="header">
+      <div class="header-badge">Personlighetstyp</div>
+      <h1>Myers-Briggs<br><span>Personlighetstyp</span></h1>
+      <p class="subtitle">Skalan går från 1 (stämmer inte alls) till 10 (stämmer helt). Svara på känn.</p>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-top">
+        <span class="progress-label">Framsteg</span>
+        <span class="progress-count" id="progress-count">0 / 20 besvarade</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+
+    <!-- ENERGI: E/I -->
+    <div class="section-header"><div class="section-line"></div><span class="section-icon">🔋</span><span class="section-title">Energi <span style="color:var(--EI)">(E/I)</span></span><div class="section-line"></div></div>
+    <div class="card" style="animation-delay:0.05s">
+      <div class="card-meta"><span class="trait-chip chip-EI">Energi</span><span class="q-number">Fråga 1</span></div>
+      <p class="question-text">Jag får energi av att umgås med många människor och sociala sammanhang.</p>
+      <div class="slider-labels"><span>1 – Stämmer inte alls</span><span>10 – Stämmer helt</span></div>
+      <input type="range" min="1" max="10" value="5" class="q-slider" data-trait="EI" data-q="1" oninput="updateSlider(this)">
+      <div class="slider-value untouched" id="val-1">Flytta reglaget</div>
+    </div>
+    <div class="card" style="animation-delay:0.10s">
+      <div class="card-meta"><span class="trait-chip chip-EI">Energi</span><span class="q-number">Fråga 2</span></div>
+      <p class="question-text">Jag tänker högt och bearbetar idéer bäst genom att prata med andra.</p>
+      <div class="slider-labels"><span>1 – Stämmer inte alls</span><span>10 – Stämmer helt</span></div>
+      <input type="range" min="1" max="10" value="5" class="q-slider" data-trait="EI" data-q="2" oninput="updateSlider(this)">
+      <div class="slider-value untouched" id="val-2">Flytta reglaget</div>
+    </div>
+    <div class="card" style="animation-delay:0.15s">
+      <div class="card-meta"><span class="trait-chip chip-EI">Energi</span><span class="q-number">Fråga 3</span></div>
+      <p class="question-text">Jag tar gärna initiativ till samtal, även med personer jag inte känner.</p>
+      <div class="slider-labels"><span>1 – Stämmer inte alls</span><span>10 – Stämmer helt</span></div>
+      <input type="range" min="1" max="10" value="5" class="q-slider" data-trait="EI" data-q="3" oninput="updateSlider(this)">
+      <div class="slider-value untouched" id="val-3">Flytta reglaget</div>
+    </div>
+    <div class="card" style="animation-delay:0.20s">
+      <div class="card-meta"><span class="trait-chip chip-EI">Energi</span><span class="q-number">Fråga 4</span></div>
+      <p class="question-text">Efter intensiv social samvaro känner jag mig laddad snarare än dränerad.</p>
+      <div class="slider-labels"><span>1 – Stämmer inte alls</span><span>10 – Stämmer helt</span></div>
+      <input type="range" min="1" max="10" value="5" class="q-slider" data-trait="EI" data-q="4" oninput="updateSlider(this)">
+      <div class="slider-value untouched" id="val-4">Flytta reglaget</div>
+    </div>
+    <div class="card" style="animation-delay:0.25s">
+      <div class="card-meta"><span class="trait-chip chip-EI">Energi</span><span class="q-number">Fråga 5</span></div>
+      <p class="question-text">Jag behöver tid för mig själv för att ladda om och föredrar djupa en-till-en-samtal.</p>
+      <div class="slider-labels"><span>1 – Stämmer inte alls</span><span>10 – Stämmer helt</span></div>
+      <input type="range" min="1" max="10" value="5" class="q-slider" data-trait="EI" data-q="5" data-reverse="true" oninput="updateSlider(this)">
+      <div class="slider-value untouched" id="val-5">Flytta reglaget</div>
+    </div>
+
+    <!-- INFORMATION: S/N -->
+    <div class="section-header"><div class="section-line"></div><span class="section-icon">🔮</span><span class="section-title">Information <span style="color:var(--SN)">(S/N)</span></span><div class="section-line"></div></div>
+    <div class="card" style="animation-delay:0.30s">
+      <div class="card-meta"><span class="trait-chip chip-SN">Information</span><span class="q-number">Fråga 6</span></div>
+      <p class="question-text">Jag dras till idéer, mönster och möjligheter snarare än konkreta fakta.</p>
+      <div class="slider-labels"><span>1 – Stämmer inte alls</span><span>10 – Stämmer helt</span></div>
+      <input type="range" min="1" max="10" value="5" class="q-slider" data-trait="SN" data-q="6" oninput="updateSlider(this)">
+      <div class="slider-value untouched" id="val-6">Flytta reglaget</div>
+    </div>
+    <div class="card" style="animation-delay:0.35s">
+      <div class="card-meta"><span class="trait-chip chip-SN">Information</span><span class="q-number">Fråga 7</span></div>
+      <p class="question-text">Jag funderar ofta på framtiden och det abstrakta "tänk om".</p>
+      <div class="slider-labels"><span>1 – Stämmer inte alls</span><span>10 – Stämmer helt</span></div>
+      <input type="range" min="1" max="10" value="5" class="q-slider" data-trait="SN" data-q="7" oninput="updateSlider(this)">
+      <div class="slider-value untouched" id="val-7">Flytta reglaget</div>
+    </div>
+    <div class="card" style="animation-delay:0.40s">
+      <div class="card-meta"><span class="trait-chip chip-SN">Information</span><span class="q-number">Fråga 8</span></div>
+      <p class="question-text">Jag litar mer på inspiration och helhetsbilder än på detaljerade observationer.</p>
+      <div class="slider-labels"><span>1 – Stämmer inte alls</span><span>10 – Stämmer helt</span></div>
+      <input type="range" min="1" max="10" value="5" class="q-slider" data-trait="SN" data-q="8" oninput="updateSlider(this)">
+      <div class="slider-value untouched" id="val-8">Flytta reglaget</div>
+    </div>
+    <div class="card" style="animation-delay:0.45s">
+      <div class="card-meta"><span class="trait-chip chip-SN">Information</span><span class="q-number">Fråga 9</span></div>
+      <p class="question-text">Jag tycker om att tolka den underliggande meningen bakom det som sägs.</p>
+      <div class="slider-labels"><span>1 – Stämmer inte alls</span><span>10 – Stämmer helt</span></div>
+      <input type="range" min="1" max="10" value="5" class="q-slider" data-trait="SN" data-q="9" oninput="updateSlider(this)">
+      <div class="slider-value untouched" id="val-9">Flytta reglaget</div>
+    </div>
+    <div class="card" style="animation-delay:0.50s">
+      <div class="card-meta"><span class="trait-chip chip-SN">Information</span><span class="q-number">Fråga 10</span></div>
+      <p class="question-text">Jag föredrar konkreta fakta, beprövad erfarenhet och praktiska detaljer.</p>
+      <div class="slider-labels"><span>1 – Stämmer inte alls</span><span>10 – Stämmer helt</span></div>
+      <input type="range" min="1" max="10" value="5" class="q-slider" data-trait="SN" data-q="10" data-reverse="true" oninput="updateSlider(this)">
+      <div class="slider-value untouched" id="val-10">Flytta reglaget</div>
+    </div>
+
+    <!-- BESLUT: T/F -->
+    <div class="section-header"><div class="section-line"></div><span class="section-icon">⚖️</span><span class="section-title">Beslut <span style="color:var(--TF)">(T/F)</span></span><div class="section-line"></div></div>
+    <div class="card" style="animation-delay:0.55s">
+      <div class="card-meta"><span class="trait-chip chip-TF">Beslut</span><span class="q-number">Fråga 11</span></div>
+      <p class="question-text">Jag fattar beslut baserat på logik och objektiva principer snarare än känslor.</p>
+      <div class="slider-labels"><span>1 – Stämmer inte alls</span><span>10 – Stämmer helt</span></div>
+      <input type="range" min="1" max="10" value="5" class="q-slider" data-trait="TF" data-q="11" oninput="updateSlider(this)">
+      <div class="slider-value untouched" id="val-11">Flytta reglaget</div>
+    </div>
+    <div class="card" style="animation-delay:0.60s">
+      <div class="card-meta"><span class="trait-chip chip-TF">Beslut</span><span class="q-number">Fråga 12</span></div>
+      <p class="question-text">Jag värdesätter rättvisa och konsekvens högre än harmoni och samförstånd.</p>
+      <div class="slider-labels"><span>1 – Stämmer inte alls</span><span>10 – Stämmer helt</span></div>
+      <input type="range" min="1" max="10" value="5" class="q-slider" data-trait="TF" data-q="12" oninput="updateSlider(this)">
+      <div class="slider-value untouched" id="val-12">Flytta reglaget</div>
+    </div>
+    <div class="card" style="animation-delay:0.65s">
+      <div class="card-meta"><span class="trait-chip chip-TF">Beslut</span><span class="q-number">Fråga 13</span></div>
+      <p class="question-text">Jag kan ge rak, kritisk feedback även när den riskerar att såra.</p>
+      <div class="slider-labels"><span>1 – Stämmer inte alls</span><span>10 – Stämmer helt</span></div>
+      <input type="range" min="1" max="10" value="5" class="q-slider" data-trait="TF" data-q="13" oninput="updateSlider(this)">
+      <div class="slider-value untouched" id="val-13">Flytta reglaget</div>
+    </div>
+    <div class="card" style="animation-delay:0.70s">
+      <div class="card-meta"><span class="trait-chip chip-TF">Beslut</span><span class="q-number">Fråga 14</span></div>
+      <p class="question-text">Jag väger för- och nackdelar opersonligt innan jag bestämmer mig.</p>
+      <div class="slider-labels"><span>1 – Stämmer inte alls</span><span>10 – Stämmer helt</span></div>
+      <input type="range" min="1" max="10" value="5" class="q-slider" data-trait="TF" data-q="14" oninput="updateSlider(this)">
+      <div class="slider-value untouched" id="val-14">Flytta reglaget</div>
+    </div>
+    <div class="card" style="animation-delay:0.75s">
+      <div class="card-meta"><span class="trait-chip chip-TF">Beslut</span><span class="q-number">Fråga 15</span></div>
+      <p class="question-text">Jag väger in hur beslut påverkar människor känslomässigt och strävar efter harmoni.</p>
+      <div class="slider-labels"><span>1 – Stämmer inte alls</span><span>10 – Stämmer helt</span></div>
+      <input type="range" min="1" max="10" value="5" class="q-slider" data-trait="TF" data-q="15" data-reverse="true" oninput="updateSlider(this)">
+      <div class="slider-value untouched" id="val-15">Flytta reglaget</div>
+    </div>
+
+    <!-- STRUKTUR: J/P -->
+    <div class="section-header"><div class="section-line"></div><span class="section-icon">🗂️</span><span class="section-title">Struktur <span style="color:var(--JP)">(J/P)</span></span><div class="section-line"></div></div>
+    <div class="card" style="animation-delay:0.80s">
+      <div class="card-meta"><span class="trait-chip chip-JP">Struktur</span><span class="q-number">Fråga 16</span></div>
+      <p class="question-text">Jag gillar att planera i förväg och hålla mig till scheman och deadlines.</p>
+      <div class="slider-labels"><span>1 – Stämmer inte alls</span><span>10 – Stämmer helt</span></div>
+      <input type="range" min="1" max="10" value="5" class="q-slider" data-trait="JP" data-q="16" oninput="updateSlider(this)">
+      <div class="slider-value untouched" id="val-16">Flytta reglaget</div>
+    </div>
+    <div class="card" style="animation-delay:0.85s">
+      <div class="card-meta"><span class="trait-chip chip-JP">Struktur</span><span class="q-number">Fråga 17</span></div>
+      <p class="question-text">Jag känner mig lugn när saker är beslutade, ordnade och avklarade.</p>
+      <div class="slider-labels"><span>1 – Stämmer inte alls</span><span>10 – Stämmer helt</span></div>
+      <input type="range" min="1" max="10" value="5" class="q-slider" data-trait="JP" data-q="17" oninput="updateSlider(this)">
+      <div class="slider-value untouched" id="val-17">Flytta reglaget</div>
+    </div>
+    <div class="card" style="animation-delay:0.90s">
+      <div class="card-meta"><span class="trait-chip chip-JP">Struktur</span><span class="q-number">Fråga 18</span></div>
+      <p class="question-text">Jag gör listor och strukturerar mina uppgifter systematiskt.</p>
+      <div class="slider-labels"><span>1 – Stämmer inte alls</span><span>10 – Stämmer helt</span></div>
+      <input type="range" min="1" max="10" value="5" class="q-slider" data-trait="JP" data-q="18" oninput="updateSlider(this)">
+      <div class="slider-value untouched" id="val-18">Flytta reglaget</div>
+    </div>
+    <div class="card" style="animation-delay:0.95s">
+      <div class="card-meta"><span class="trait-chip chip-JP">Struktur</span><span class="q-number">Fråga 19</span></div>
+      <p class="question-text">Jag föredrar tydliga ramar och fastställda planer framför att hålla allt öppet.</p>
+      <div class="slider-labels"><span>1 – Stämmer inte alls</span><span>10 – Stämmer helt</span></div>
+      <input type="range" min="1" max="10" value="5" class="q-slider" data-trait="JP" data-q="19" oninput="updateSlider(this)">
+      <div class="slider-value untouched" id="val-19">Flytta reglaget</div>
+    </div>
+    <div class="card" style="animation-delay:1.00s">
+      <div class="card-meta"><span class="trait-chip chip-JP">Struktur</span><span class="q-number">Fråga 20</span></div>
+      <p class="question-text">Jag trivs med spontanitet och att hålla alternativen öppna in i sista stund.</p>
+      <div class="slider-labels"><span>1 – Stämmer inte alls</span><span>10 – Stämmer helt</span></div>
+      <input type="range" min="1" max="10" value="5" class="q-slider" data-trait="JP" data-q="20" data-reverse="true" oninput="updateSlider(this)">
+      <div class="slider-value untouched" id="val-20">Flytta reglaget</div>
+    </div>
+
+    <div class="submit-area">
+      <button class="btn-submit" id="btn-submit" onclick="showResults()" disabled>Se ditt resultat</button>
+      <p class="btn-hint" id="btn-hint">Besvara alla 20 frågor för att fortsätta</p>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results">
+    <div class="results-header">
+      <div class="header-badge">Din typ</div>
+      <h2 id="results-name-header">Din personlighetstyp</h2>
+      <p>Baserat på dina svar – Myers-Briggs beskriver dina preferenser, inte dina förmågor. Ingen typ är bättre än någon annan.</p>
+    </div>
+    <div class="insight-result" id="insight-card"></div>
+    <div id="trait-bars"></div>
+
+    <div class="ai-section">
+      <div class="ai-header">
+        <div class="section-line"></div>
+        <div class="ai-badge"><span class="ai-badge-dot"></span>Typanalys</div>
+        <div class="section-line"></div>
+      </div>
+      <div class="ai-card">
+        <div class="ai-loading" id="ai-loading">
+          <div class="ai-spinner"></div>
+          <p class="ai-loading-text">Din profil analyseras<br><span class="ai-dots"><span>.</span><span>.</span><span>.</span></span></p>
+        </div>
+        <div class="ai-content" id="ai-content"></div>
+        <div class="ai-error" id="ai-error" style="display:none;"></div>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn-pdf" id="btn-pdf" onclick="openPDF()" disabled>⬇ Visa &amp; spara rapport</button>
+      <button class="btn-reset" onclick="resetTest()">Gör testet igen</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- PDF overlay måste vara direkt under body för att print-CSS ska fungera -->
+<div id="pdf-overlay">
+  <div class="pdf-modal">
+    <div class="pdf-topbar">
+      <span>Din personlighetsrapport – Spara med Ctrl+P / Cmd+P → "Spara som PDF"</span>
+      <div class="pdf-actions">
+        <button class="btn-print" onclick="window.print()">🖨 Skriv ut / Spara PDF</button>
+        <button class="btn-close-pdf" onclick="closePDF()">✕ Stäng</button>
+      </div>
+    </div>
+    <div class="pdf-body" id="pdf-body"></div>
+  </div>
+</div>
+
+<script>
+const touched = new Set();
+const TOTAL = 20;
+let userName = '';
+// API-nyckeln ligger numera server-side (Cloudflare secret), aldrig i klienten.
+let lastScores = null;
+let lastType = null;
+let aiRawText = '';
+
+// Saneringsskydd: ta bort långa tankstreck (em-dash) helt, oavsett AI-output
+function stripEmDash(text){
+  return (text||'').replace(/\s*—\s*/g,' – ').replace(/—/g,'-').replace(/―/g,'-');
+}
+
+// Varje dikotomi: hög poäng = "high"-polen, låg poäng = "low"-polen.
+const dichMeta = {
+  EI:{axis:'Energi',emoji:'🔋',color:'#9b7cbf',
+    high:{letter:'E',name:'Extraversion'}, low:{letter:'I',name:'Introversion'},
+    highDesc:'Du laddas av yttre samspel, handling och människor. Du tänker ofta bäst i dialog och tar plats utåt.',
+    lowDesc:'Du laddas av lugn, reflektion och egen tid. Du bearbetar inåt och föredrar djup framför bredd i kontakter.'},
+  SN:{axis:'Information',emoji:'🔮',color:'#c9a84c',
+    high:{letter:'N',name:'Intuition'}, low:{letter:'S',name:'Sinnesintryck'},
+    highDesc:'Du fokuserar på mönster, möjligheter och det abstrakta. Du dras till framtiden och den större bilden.',
+    lowDesc:'Du fokuserar på konkreta fakta, detaljer och beprövad erfarenhet. Du litar på det du kan se, höra och ta på.'},
+  TF:{axis:'Beslut',emoji:'⚖️',color:'#bf7c9b',
+    high:{letter:'T',name:'Tänkande'}, low:{letter:'F',name:'Kännande'},
+    highDesc:'Du fattar beslut med logik, principer och objektiv analys. Rättvisa och konsekvens väger tungt.',
+    lowDesc:'Du fattar beslut med empati, värderingar och hänsyn till människor. Harmoni och samförstånd väger tungt.'},
+  JP:{axis:'Struktur',emoji:'🗂️',color:'#7bbf9b',
+    high:{letter:'J',name:'Bedömande'}, low:{letter:'P',name:'Uppfattande'},
+    highDesc:'Du föredrar struktur, planering och avslut. Du trivs när saker är bestämda och under kontroll.',
+    lowDesc:'Du föredrar flexibilitet, spontanitet och öppna alternativ. Du trivs när planer kan anpassas i stunden.'}
+};
+
+const dichOrder = ['EI','SN','TF','JP'];
+
+const mbtiTypes = {
+  INTJ:{name:'Arkitekten',desc:'Strategisk, självständig och visionär. Du ser system och långsiktiga lösningar där andra ser kaos.'},
+  INTP:{name:'Logikern',desc:'Nyfiken, analytisk och idédriven. Du älskar att förstå hur saker hänger ihop på djupet.'},
+  ENTJ:{name:'Befälhavaren',desc:'Beslutsam, målmedveten och ledande. Du organiserar människor och resurser mot tydliga mål.'},
+  ENTP:{name:'Debattören',desc:'Snabbtänkt, uppfinningsrik och provocerande. Du utmanar idéer och älskar intellektuella dueller.'},
+  INFJ:{name:'Förespråkaren',desc:'Insiktsfull, principfast och idealistisk. Du drivs av mening och vill göra verklig skillnad.'},
+  INFP:{name:'Medlaren',desc:'Värderingsdriven, empatisk och kreativ. Du söker autenticitet och harmoni med dina ideal.'},
+  ENFJ:{name:'Protagonisten',desc:'Inspirerande, varm och samlande. Du ser potentialen i människor och får dem att växa.'},
+  ENFP:{name:'Inspiratören',desc:'Entusiastisk, fantasifull och social. Du ser möjligheter överallt och smittar med din energi.'},
+  ISTJ:{name:'Logistikern',desc:'Pålitlig, noggrann och ansvarstagande. Du levererar med ordning och håller vad du lovar.'},
+  ISFJ:{name:'Försvararen',desc:'Omtänksam, lojal och praktisk. Du tar hand om andra och håller saker stabila i bakgrunden.'},
+  ESTJ:{name:'Verkställaren',desc:'Organiserad, rakryggad och effektiv. Du får ordning på saker och driver igenom det som ska göras.'},
+  ESFJ:{name:'Konsuln',desc:'Hjälpsam, social och pliktmedveten. Du skapar gemenskap och ser till att alla mår bra.'},
+  ISTP:{name:'Hantverkaren',desc:'Praktisk, logisk och orädd. Du löser problem hands-on och håller huvudet kallt i kris.'},
+  ISFP:{name:'Äventyraren',desc:'Konstnärlig, känslig och spontan. Du lever i nuet och uttrycker dig genom handling och estetik.'},
+  ESTP:{name:'Entreprenören',desc:'Energisk, riskvillig och handlingskraftig. Du agerar snabbt och trivs där det händer saker.'},
+  ESFP:{name:'Underhållaren',desc:'Spontan, varm och livfull. Du sprider glädje och lever fullt ut i ögonblicket.'}
+};
+
+function checkName(){
+  const v=document.getElementById('user-name').value.trim();
+  document.getElementById('btn-start').disabled=v.length<2;
+}
+
+function startTest(){
+  userName=document.getElementById('user-name').value.trim();
+  // apiKey is hardcoded
+  if(userName.length<2)return;
+  document.getElementById('intro-screen').style.display='none';
+  document.getElementById('form-section').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function updateSlider(el){
+  const q=el.dataset.q,val=el.value;
+  const valEl=document.getElementById('val-'+q);
+  valEl.textContent=val; valEl.classList.remove('untouched');
+  const pct=(val-1)/9*100;
+  el.style.background=`linear-gradient(90deg,var(--accent) ${pct}%,var(--surface2) ${pct}%)`;
+  touched.add(q); countAnswered();
+}
+
+function countAnswered(){
+  const n=touched.size;
+  document.getElementById('progress-count').textContent=`${n} / ${TOTAL} besvarade`;
+  document.getElementById('progress-fill').style.width=`${(n/TOTAL)*100}%`;
+  const btn=document.getElementById('btn-submit');
+  btn.disabled=n<TOTAL;
+  document.getElementById('btn-hint').textContent=n<TOTAL?`Besvara alla 20 frågor för att fortsätta (${TOTAL-n} kvar)`:'';
+}
+
+function getScores(){
+  const raw={EI:[],SN:[],TF:[],JP:[]};
+  document.querySelectorAll('.q-slider').forEach(el=>{
+    const val=parseInt(el.value);
+    raw[el.dataset.trait].push(el.dataset.reverse==='true' ? 11-val : val);
+  });
+  const avg={};
+  for(const t in raw) avg[t]=raw[t].reduce((a,b)=>a+b,0)/raw[t].length;
+  return avg;
+}
+
+// Returnerar { code, letters:{EI:'E',...}, prefs:{EI:{letter,name,pct,desc}} }
+function computeType(scores){
+  const letters={}, prefs={};
+  dichOrder.forEach(key=>{
+    const m=dichMeta[key], avg=scores[key];
+    const isHigh=avg>=5.5;
+    const pole=isHigh?m.high:m.low;
+    // styrka mot vald pol: 50% vid mitten (5.5), 100% vid ytterlighet
+    const dist=Math.abs(avg-5.5)/4.5; // 0..1
+    const pct=Math.round(50+dist*50);
+    letters[key]=pole.letter;
+    prefs[key]={letter:pole.letter,name:pole.name,pct,desc:isHigh?m.highDesc:m.lowDesc,markerPos:avg/10*100};
+  });
+  return {code:dichOrder.map(k=>letters[k]).join(''), letters, prefs};
+}
+
+async function showResults(){
+  document.getElementById('form-section').style.display='none';
+  document.getElementById('results').style.display='block';
+  const first=userName.split(' ')[0];
+  document.getElementById('results-name-header').textContent=`${first}s personlighetstyp`;
+  window.scrollTo({top:0,behavior:'smooth'});
+  const scores=getScores();
+  lastScores=scores;
+  const type=computeType(scores);
+  lastType=type;
+
+  const t=mbtiTypes[type.code];
+  const codeChips=dichOrder.map(k=>`<span>${type.prefs[k].letter} · ${type.prefs[k].name} ${type.prefs[k].pct}%</span>`).join('');
+  document.getElementById('insight-card').innerHTML=`
+    <h3>Din personlighetstyp</h3>
+    <div class="insight-big-score">${type.code}</div>
+    <div class="insight-label">${t.name}</div>
+    <p class="insight-desc">${t.desc}</p>
+    <div class="insight-code">${codeChips}</div>`;
+
+  const barsHtml=dichOrder.map((key,i)=>{
+    const m=dichMeta[key], p=type.prefs[key];
+    const leftActive=p.letter===m.low.letter, rightActive=p.letter===m.high.letter;
+    return `<div class="trait-card" style="animation-delay:${0.1+i*0.08}s">
+      <div class="trait-header">
+        <div class="trait-name"><span class="emoji">${m.emoji}</span><strong>${m.axis}</strong></div>
+        <span class="trait-score" style="color:${m.color}">${p.letter} ${p.pct}%</span>
+      </div>
+      <div class="spectrum-poles">
+        <span class="${leftActive?'active':''}">${m.low.letter} · ${m.low.name}</span>
+        <span class="${rightActive?'active':''}">${m.high.name} · ${m.high.letter}</span>
+      </div>
+      <div class="spectrum-track">
+        <div class="spectrum-mid"></div>
+        <div class="spectrum-marker" style="background:${m.color};box-shadow:0 0 0 2px ${m.color};left:50%" data-pos="${p.markerPos}"></div>
+      </div>
+      <p class="trait-desc">${p.desc}</p>
+    </div>`;
+  }).join('');
+  document.getElementById('trait-bars').innerHTML=barsHtml;
+  setTimeout(()=>document.querySelectorAll('.spectrum-marker').forEach(el=>el.style.left=el.dataset.pos+'%'),200);
+
+  await fetchAIAnalysis(scores,type);
+}
+
+async function fetchAIAnalysis(scores,type){
+  if(!apiKey){
+    document.getElementById('ai-loading').style.display='none';
+    const errEl=document.getElementById('ai-error');
+    errEl.style.display='block';
+    errEl.textContent='Ingen API-nyckel angiven – AI-analys hoppas över.';
+    document.getElementById('btn-pdf').disabled=false;
+    return;
+  }
+  const t=mbtiTypes[type.code];
+  const prefLines=dichOrder.map(k=>{
+    const m=dichMeta[k], p=type.prefs[k];
+    return `• ${m.axis}: ${p.letter} (${p.name}) – ${p.pct}% preferensstyrka`;
+  }).join('\n');
+  const prompt=`Du är en erfaren typolog och organisationspsykolog med över 20 års erfarenhet av Myers-Briggs-modellen (MBTI) och Jungiansk typteori, inklusive kognitiva funktioner. Du kombinerar vetenskaplig precision med värme och ärlighet.
+
+Klientens namn: ${userName}
+
+Resultat – personlighetstyp: ${type.code} (${t.name})
+${prefLines}
+
+Testet innehåller omvända frågor (reverse-scored items), så preferenserna är kalibrerade. Tänk på att preferenser nära 50–60% är svagare och mer flexibla än preferenser nära 90–100%. Behandla en mycket stark preferens (>85%) med extra skärpa – den har nästan alltid en baksida.
+
+Skriv en personlig, direkt och nyanserad typanalys på svenska, tilltalad till ${userName.split(' ')[0]}. Resonera utifrån hela typkoden ${type.code} som en helhet – inte bara enskilda bokstäver. Nämn gärna typens dominanta kognitiva funktion där det är relevant.
+
+Strukturera svaret exakt så här:
+
+## Din typ i korthet
+2–3 meningar som fångar kärnan i ${type.code} – som om du beskriver ${userName.split(' ')[0]} för en kollega.
+
+## Dina kognitiva styrkor – och baksidan
+3 genuina styrkor kopplade till typen, med en baksida för varje. Var specifik.
+
+## Så fungerar du under press
+2–3 konkreta mönster för hur ${type.code} reagerar i stress (gärna kopplat till den inferiora funktionen). Direkt men respektfullt.
+
+## Relationer & kommunikation
+3–4 konkreta råd om hur ${userName.split(' ')[0]} kommunicerar bäst och möter andra typer.
+
+## En sak att börja med imorgon
+En enda, mycket konkret handling inom 24 timmar baserad på just denna typ.
+
+Håll analysen till max 400 ord totalt. Var koncis och träffsäker – varje mening ska tillföra något. Svara ENBART med analysen. Börja direkt med första rubriken.
+
+VIKTIGT OM TYPOGRAFI: Använd ALDRIG långt tankstreck (em-dash, Unicode U+2014). Använd vanligt bindestreck (-) eller kort tankstreck (–) istället. Detta är ett absolut krav.`;
+
+  try{
+    const res=await fetch("/api/analyze",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({prompt,max_tokens:900})
+    });
+    const data=await res.json();
+    if(!res.ok){
+      const msg=data?.error||`API-fel ${res.status}`;
+      throw new Error(msg);
+    }
+    const text=stripEmDash(data.text||'');
+    if(!text)throw new Error('API returnerade tomt svar');
+    aiRawText=text;
+    document.getElementById('ai-loading').style.display='none';
+    const contentEl=document.getElementById('ai-content');
+    contentEl.style.display='block';
+    contentEl.innerHTML=renderMarkdown(text);
+    document.getElementById('btn-pdf').disabled=false;
+  }catch(e){
+    document.getElementById('ai-loading').style.display='none';
+    const errEl=document.getElementById('ai-error');
+    errEl.style.display='block';
+    errEl.textContent=`AI-analys misslyckades: ${e.message}`;
+    document.getElementById('btn-pdf').disabled=false;
+  }
+}
+
+function renderMarkdown(md){
+  const lines=md.split('\n');
+  const out=[];
+  let inList=false;
+  for(const raw of lines){
+    const line=raw.trimEnd();
+    if(/^## (.+)/.test(line)){
+      if(inList){out.push('</ul>');inList=false;}
+      out.push(`<h4>${line.replace(/^## /,'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')}</h4>`);
+    } else if(/^[\-•*] (.+)/.test(line)||/^\d+\. (.+)/.test(line)){
+      const text=line.replace(/^[\-•*\d.] +/,'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+      if(!inList){out.push('<ul>');inList=true;}
+      out.push(`<li>${text}</li>`);
+    } else if(line.trim()===''){
+      if(inList){out.push('</ul>');inList=false;}
+      out.push('');
+    } else {
+      if(inList){out.push('</ul>');inList=false;}
+      out.push(`<p>${line.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')}</p>`);
+    }
+  }
+  if(inList)out.push('</ul>');
+  return out.join('\n');
+}
+
+function openPDF(){
+  const dateStr=new Date().toLocaleDateString('sv-SE',{year:'numeric',month:'long',day:'numeric'});
+  const t=mbtiTypes[lastType.code];
+
+  const scoreRows=dichOrder.map(key=>{
+    const m=dichMeta[key], p=lastType.prefs[key];
+    return `<div class="pdf-score-row">
+      <span class="pdf-score-name">${m.axis} – ${p.name}</span>
+      <div class="pdf-score-bar-wrap"><div class="pdf-score-bar" style="width:${p.pct}%;background:${m.color}"></div></div>
+      <span class="pdf-score-val" style="color:${m.color}">${p.letter} ${p.pct}%</span>
+    </div>`;
+  }).join('');
+
+  const analysisHtml=aiRawText
+    ? aiRawText
+        .replace(/^## (.+)$/gm,'<h3>$1</h3>')
+        .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+        .replace(/^[\-•] (.+)$/gm,'<li>$1</li>')
+        .replace(/(<li>[\s\S]+?<\/li>)/g,m=>`<ul>${m}</ul>`)
+        .replace(/<\/ul>\s*<ul>/g,'')
+        .split('\n').map(l=>(!l.startsWith('<')&&l.trim())?`<p>${l}</p>`:l).join('\n')
+    : '<p><em>AI-analysen kunde inte hämtas.</em></p>';
+
+  document.getElementById('pdf-body').innerHTML=`
+    <div class="pdf-header">
+      <h1>Myers-Briggs – Typrapport</h1>
+      <p>${userName} &nbsp;·&nbsp; ${dateStr} &nbsp;·&nbsp; Konfidentiellt</p>
+    </div>
+    <div class="pdf-section-title">Din typ: ${lastType.code} – ${t.name}</div>
+    <p style="font-size:11.5px;color:#333;line-height:1.7;margin-bottom:14px;">${t.desc}</p>
+    ${scoreRows}
+    <div class="pdf-section-title">Typanalys</div>
+    <div class="pdf-analysis">${analysisHtml}</div>
+    <div class="pdf-footer">
+      <span>Myers-Briggs Typrapport · ${userName}</span>
+      <span>${dateStr}</span>
+    </div>`;
+
+  document.getElementById('pdf-overlay').style.display='block';
+  document.getElementById('pdf-overlay').scrollTop=0;
+}
+
+function closePDF(){
+  document.getElementById('pdf-overlay').style.display='none';
+}
+
+function resetTest(){
+  touched.clear();aiRawText='';lastScores=null;lastType=null;
+  document.querySelectorAll('.q-slider').forEach(el=>{el.value=5;el.style.background='';});
+  document.querySelectorAll('.slider-value').forEach(el=>{el.textContent='Flytta reglaget';el.classList.add('untouched');});
+  document.getElementById('ai-loading').style.display='flex';
+  document.getElementById('ai-content').style.display='none';
+  document.getElementById('ai-error').style.display='none';
+  document.getElementById('btn-pdf').disabled=true;
+  document.getElementById('user-name').value='';
+  document.getElementById('btn-start').disabled=true;
+  countAnswered();
+  document.getElementById('results').style.display='none';
+  document.getElementById('form-section').style.display='none';
+  document.getElementById('intro-screen').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+countAnswered();
+</script>
+</body>
+</html>

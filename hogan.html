@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledarskapsanalys – HOGAN-Profil</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0e17;--surface:#1a1928;--surface2:#22213a;--border:rgba(255,255,255,0.08);
+  --accent:#c9a84c;--accent2:#e8c97a;--text:#f0eee8;--muted:#8b8a9e;--radius:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse at 15% 50%,rgba(124,155,191,0.06) 0%,transparent 60%),
+  radial-gradient(ellipse at 85% 20%,rgba(201,168,76,0.05) 0%,transparent 50%),
+  radial-gradient(ellipse at 60% 80%,rgba(191,124,124,0.05) 0%,transparent 50%);
+  pointer-events:none;z-index:0;}
+.container{max-width:760px;margin:0 auto;padding:48px 24px 80px;position:relative;z-index:1;}
+
+/* HEADER */
+.header{text-align:center;margin-bottom:48px;animation:fadeUp 0.6s ease both;}
+.header-badge{display:inline-block;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);border:1px solid rgba(201,168,76,0.3);padding:6px 16px;border-radius:100px;margin-bottom:18px;}
+.header h1{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;line-height:1.15;margin-bottom:12px;}
+.header p{font-size:14px;color:var(--muted);line-height:1.65;max-width:480px;margin:0 auto;}
+
+/* PROGRESS */
+.progress-bar{background:var(--surface2);border-radius:100px;height:4px;margin-bottom:40px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:100px;transition:width 0.4s ease;width:0%;}
+
+/* SECTIONS */
+.section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 32px;margin-bottom:20px;animation:fadeUp 0.5s ease both;}
+.section-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:22px;}
+.section-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.section-title-wrap{}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;margin-bottom:3px;}
+.section-subtitle{font-size:12px;color:var(--muted);letter-spacing:0.05em;}
+.section-tag{display:inline-block;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;padding:2px 8px;border-radius:100px;margin-left:8px;vertical-align:middle;font-weight:500;}
+.tag-styrka{background:rgba(123,191,155,0.15);color:#7bbf9b;border:1px solid rgba(123,191,155,0.25);}
+.tag-risk{background:rgba(191,124,124,0.15);color:#bf7c7c;border:1px solid rgba(191,124,124,0.25);}
+
+/* QUESTIONS */
+.question{margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.05);}
+.question:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.question-text{font-size:14px;line-height:1.6;margin-bottom:14px;color:var(--text);}
+.question-num{color:var(--muted);font-size:12px;margin-right:6px;}
+
+/* 4-OPTION RADIO */
+.options-4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+@media(max-width:600px){.options-4{grid-template-columns:repeat(2,1fr);}}
+.opt-label{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;padding:10px 8px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);transition:border-color 0.15s,background 0.15s;text-align:center;}
+.opt-label:hover{border-color:rgba(201,168,76,0.3);}
+.opt-label input{position:absolute;opacity:0;pointer-events:none;}
+.opt-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);transition:border-color 0.15s,background 0.15s;flex-shrink:0;}
+.opt-label.selected{border-color:var(--dim-color,var(--accent));background:rgba(201,168,76,0.06);}
+.opt-label.selected .opt-dot{background:var(--dim-color,var(--accent));border-color:var(--dim-color,var(--accent));}
+.opt-text{font-size:11px;color:var(--muted);line-height:1.3;}
+.opt-label.selected .opt-text{color:var(--text);}
+
+/* SUBMIT */
+.submit-wrap{text-align:center;margin-top:36px;}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0f0e17;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;border:none;padding:14px 48px;border-radius:100px;cursor:pointer;letter-spacing:0.03em;transition:transform 0.15s,box-shadow 0.15s;}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(201,168,76,0.3);}
+.btn-primary:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+.error-msg{color:#bf7c7c;font-size:13px;margin-top:14px;display:none;}
+
+/* RESULTS */
+#results{display:none;animation:fadeUp 0.6s ease both;}
+.result-header{text-align:center;margin-bottom:40px;}
+.result-title{font-family:'Cormorant Garamond',serif;font-size:34px;margin-bottom:8px;}
+.result-sub{font-size:14px;color:var(--muted);}
+
+/* RADAR */
+.radar-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:24px;display:flex;align-items:center;justify-content:center;}
+#radarCanvas{max-width:100%;display:block;}
+
+/* RESULT CATEGORIES */
+.result-cat-label{font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;margin-top:24px;}
+.dim-bar-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:12px;}
+.dim-bar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.dim-bar-name{font-size:14px;font-weight:500;}
+.dim-bar-tag{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;padding:2px 8px;border-radius:100px;font-weight:500;}
+.dim-bar-pct{font-size:13px;color:var(--muted);}
+.dim-bar-track{height:6px;background:var(--surface2);border-radius:100px;overflow:hidden;}
+.dim-bar-fill{height:100%;border-radius:100px;transition:width 1s ease;}
+
+/* INSIGHT CARD */
+.insight-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 28px;margin-bottom:24px;}
+.insight-label{font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+.insight-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:520px){.insight-grid{grid-template-columns:1fr;}}
+.insight-item{background:var(--surface2);border-radius:10px;padding:14px 16px;}
+.insight-item-label{font-size:11px;color:var(--muted);margin-bottom:4px;}
+.insight-item-value{font-size:15px;font-weight:500;}
+
+/* AI ANALYSIS */
+.ai-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 32px;margin-bottom:24px;}
+.ai-header{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.ai-icon{font-size:20px;}
+.ai-label{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;}
+.ai-body{font-size:14px;line-height:1.75;color:var(--text);}
+.ai-body p{margin-bottom:12px;}
+.ai-body p:last-child{margin-bottom:0;}
+.ai-loading{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;}
+.spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
+
+/* PDF TRIGGER BTN */
+.btn-pdf{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#1a1200;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;padding:13px 32px;border:none;border-radius:100px;cursor:pointer;letter-spacing:0.05em;transition:transform 0.15s,box-shadow 0.15s,opacity 0.2s;box-shadow:0 4px 20px rgba(201,168,76,0.3);display:block;margin:0 auto;}
+.btn-pdf:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(201,168,76,0.4);}
+.btn-pdf:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+
+/* PDF OVERLAY (vit pappersmodal) */
+#pdf-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(10,9,20,0.92);overflow-y:auto;padding:30px 20px;}
+.pdf-modal{background:#fff;color:#1a1928;max-width:760px;margin:0 auto;border-radius:12px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,0.6);}
+.pdf-topbar{background:#1a1928;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;}
+.pdf-topbar span{font-size:13px;color:#8b8a9e;}
+.pdf-actions{display:flex;gap:10px;}
+.btn-print{background:linear-gradient(135deg,#c9a84c,#e8c97a);color:#1a1200;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:9px 22px;border:none;border-radius:100px;cursor:pointer;}
+.btn-close-pdf{background:transparent;color:#8b8a9e;font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 18px;border:1px solid rgba(255,255,255,0.1);border-radius:100px;cursor:pointer;}
+.btn-close-pdf:hover{color:#f0eee8;border-color:rgba(255,255,255,0.25);}
+.pdf-body{padding:48px 56px 56px;font-family:'DM Sans',sans-serif;font-size:12px;line-height:1.65;}
+.pdf-header{background:#0f0e17;color:#f0eee8;padding:26px 30px;border-radius:8px;margin-bottom:28px;}
+.pdf-header h1{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:#c9a84c;margin-bottom:4px;}
+.pdf-header p{font-size:11px;color:#8b8a9e;}
+.pdf-section-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:#0f0e17;margin:26px 0 12px;padding-bottom:6px;border-bottom:2px solid #c9a84c;}
+.pdf-cat-label{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#888;margin:18px 0 10px;}
+.pdf-score-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.pdf-score-name{width:200px;font-size:11px;color:#444;flex-shrink:0;}
+.pdf-score-bar-wrap{flex:1;height:8px;background:#e8e6f0;border-radius:4px;overflow:hidden;}
+.pdf-score-bar{height:100%;border-radius:4px;}
+.pdf-score-val{width:42px;text-align:right;font-weight:600;font-size:13px;flex-shrink:0;}
+.pdf-analysis h3{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:600;color:#c9a84c;margin:22px 0 7px;}
+.pdf-analysis p{font-size:11.5px;color:#333;line-height:1.72;margin-bottom:8px;}
+.pdf-analysis ul{padding-left:18px;margin-bottom:8px;}
+.pdf-analysis li{font-size:11.5px;color:#333;line-height:1.7;margin-bottom:4px;}
+.pdf-analysis strong{color:#1a1928;font-weight:600;}
+.pdf-footer{margin-top:36px;padding-top:12px;border-top:1px solid #ddd;font-size:10px;color:#aaa;display:flex;justify-content:space-between;}
+
+/* PRINT */
+@media print{
+  .container{display:none!important;}
+  body::before{display:none!important;}
+  #pdf-overlay{display:block!important;position:static!important;background:none!important;padding:0!important;}
+  .pdf-topbar{display:none!important;}
+  .pdf-modal{box-shadow:none!important;border-radius:0!important;}
+  .pdf-body{padding:20px 30px!important;}
+  .pdf-header{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .pdf-score-bar{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .pdf-section-title{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-badge">Ledarskapsanalys</div>
+    <h1>HOGAN-Profil</h1>
+    <p>Svara utifrån hur du faktiskt agerar – inte hur du önskar att du agerade.</p>
+  </div>
+
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+  <div id="survey"></div>
+
+  <div class="submit-wrap">
+    <button class="btn-primary" id="submitBtn" onclick="submitTest()">Generera min profil</button>
+    <div class="error-msg" id="errorMsg">Svara på alla frågor innan du fortsätter.</div>
+  </div>
+
+  <div id="results">
+    <div class="result-header">
+      <div class="result-title">Din ledarskapsrapport</div>
+      <div class="result-sub" id="resultSub">HOGAN-Profil · Ledarskapsanalys</div>
+    </div>
+
+    <div class="radar-wrap">
+      <canvas id="radarCanvas" width="480" height="480"></canvas>
+    </div>
+
+    <div id="dimBarsWrap"></div>
+
+    <div class="insight-card">
+      <div class="insight-label">Nyckelinsikter</div>
+      <div class="insight-grid" id="insightGrid"></div>
+    </div>
+
+    <div class="ai-card">
+      <div class="ai-header">
+        <span class="ai-icon">✦</span>
+        <span class="ai-label">AI-analys av din ledarskapsproﬁl</span>
+      </div>
+      <div class="ai-body" id="aiBody">
+        <div class="ai-loading"><div class="spinner"></div><span>Analyserar din profil…</span></div>
+      </div>
+    </div>
+
+    <button class="btn-pdf" id="btnPdf" onclick="openPDF()">⬇ Visa &amp; spara rapport</button>
+  </div>
+
+</div>
+
+<!-- PDF overlay måste ligga direkt under body för att print-CSS ska fungera -->
+<div id="pdf-overlay">
+  <div class="pdf-modal">
+    <div class="pdf-topbar">
+      <span>Din ledarskapsrapport – Spara med Ctrl+P / Cmd+P → "Spara som PDF"</span>
+      <div class="pdf-actions">
+        <button class="btn-print" onclick="window.print()">🖨 Skriv ut / Spara PDF</button>
+        <button class="btn-close-pdf" onclick="closePDF()">✕ Stäng</button>
+      </div>
+    </div>
+    <div class="pdf-body" id="pdf-body"></div>
+  </div>
+</div>
+
+<script>
+// API-nyckeln ligger numera server-side (Cloudflare secret), aldrig i klienten.
+let lastScores = null;
+let aiRawText = '';
+
+const THEMES = [
+  {
+    id:'driv', name:'Självstart och Driv', subtitle:'Autonomi och eget initiativ',
+    color:'#7c9bbf', colorRgb:'124,155,191', icon:'🚀', type:'styrka',
+    questions:[
+      {t:"Jag sätter igång nya affärsinitiativ utan att behöva stämma av med andra först.", r:false},
+      {t:"Jag trivs bäst när ramarna för mina arbetsuppgifter är tydligt definierade av någon annan.", r:true},
+      {t:"Om jag ser ett problem i organisationen löser jag det direkt istället för att vänta på ett formellt beslut.", r:false},
+      {t:"Jag drar mig för att starta projekt om jag inte har en garanti för att resurserna räcker hela vägen.", r:true},
+      {t:"Jag motiveras av att nå mål som jag själv har varit med och satt upp.", r:false},
+      {t:"Jag föredrar att arbeta i miljöer där det finns en tydlig struktur och färdiga processer att följa.", r:true},
+      {t:"När en uppgift är oklar ser jag det som en möjlighet att forma den efter eget huvud.", r:false},
+      {t:"Jag känner mig osäker om jag förväntas fatta beslut som saknar tydliga riktlinjer.", r:true},
+      {t:"Jag letar ständigt efter nya sätt att utveckla och förbättra verksamheten.", r:false},
+      {t:"Jag väntar hellre på direktiv än att riskera att gå utanför mitt befogenhetsområde.", r:true}
+    ]
+  },
+  {
+    id:'struktur', name:'Struktur och Uthållighet', subtitle:'Förmågan att slutföra projekt',
+    color:'#c9a84c', colorRgb:'201,168,76', icon:'🏗️', type:'styrka',
+    questions:[
+      {t:"Jag är noggrann med att slutföra de projekt jag påbörjat, även när den första entusiasmen lagt sig.", r:false},
+      {t:"Jag har en tendens att lämna detaljer halvfärdiga om en ny och mer spännande utmaning dyker upp.", r:true},
+      {t:"Jag dokumenterar mina planer och strategier noggrant för att säkerställa att ingenting glöms bort.", r:false},
+      {t:"Jag tycker att detaljplanering ofta hämmar min kreativitet och min förmåga att agera snabbt.", r:true},
+      {t:"Jag följer upp delegationer till medarbetare systematiskt och regelbundet.", r:false},
+      {t:"Jag litar på min magkänsla snarare än att följa en strikt skriven checklista.", r:true},
+      {t:"Innan jag fattar ett beslut analyserar jag noggrant de långsiktiga konsekvenserna.", r:false},
+      {t:"Jag blir lätt uttråkad av administrativa rutiner och daglig förvaltning.", r:true},
+      {t:"Jag sätter upp tydliga milstolpar för mig själv och håller mina tidsramar.", r:false},
+      {t:"Jag föredrar att improvisera fram lösningar när problem uppstår istället för att följa en fastlagd plan.", r:true}
+    ]
+  },
+  {
+    id:'resiliens', name:'Resiliens och Emotionell Stabilitet', subtitle:'Stresstålighet i det lilla bolaget',
+    color:'#7bbf9b', colorRgb:'123,191,155', icon:'⚓', type:'styrka',
+    questions:[
+      {t:"Jag behåller mitt lugn och fattar rationella beslut även när flera kriser inträffar samtidigt.", r:false},
+      {t:"Jag märker att min sömn eller mitt humör påverkas negativt under perioder av hög arbetsbelastning.", r:true},
+      {t:"Jag har lätt för att skaka av mig kritik och gå vidare utan att älta det personligen.", r:false},
+      {t:"När oväntade motgångar sker tar det mig ofta ett tag att återfå motivationen.", r:true},
+      {t:"Jag uppfattas av min omgivning som en stabil och trygg punkt när det stormar i verksamheten.", r:false},
+      {t:"Jag kan bli frustrerad och visa irritation om saker inte går enligt planerna.", r:true},
+      {t:"Jag hanterar osäkerhet på marknaden genom att fokusera på det jag faktiskt kan påverka.", r:false},
+      {t:"Jag känner en hög grad av press när jag vet att hela ansvaret för bolagets ekonomi vilar på mig.", r:true},
+      {t:"Jag har lätt för att skilja på mitt professionella ansvar och mitt personliga värde.", r:false},
+      {t:"När jag känner mig stressad har jag svårare än vanligt att koncentrera mig på strategiska frågor.", r:true}
+    ]
+  },
+  {
+    id:'kommunikation', name:'Kommunikativ Smidighet', subtitle:'Ledarskap i den lilla gruppen',
+    color:'#9b7cbf', colorRgb:'155,124,191', icon:'🤝', type:'styrka',
+    questions:[
+      {t:"Jag anpassar mitt ledarskap beroende på vilken person jag pratar med.", r:false},
+      {t:"Jag tycker att det är slöseri med tid att förankra beslut som jag redan vet är de rätta.", r:true},
+      {t:"Jag är bra på att lyssna in medarbetares oro och agera på den innan det blir en konflikt.", r:false},
+      {t:"Jag föredrar att kommunicera via mejl eller formella möten snarare än spontana samtal i korridoren.", r:true},
+      {t:"Jag ger regelbundet både positiv och konstruktiv feedback till mina medarbetare.", r:false},
+      {t:"Jag har svårt att dölja om jag tycker att en medarbetares förslag är dåligt eller ogenomtänkt.", r:true},
+      {t:"Jag prioriterar att bygga starka, personliga relationer med alla i mitt team.", r:false},
+      {t:"Jag anser att en VD ska hålla en viss professionell distans till de anställda.", r:true},
+      {t:"Jag bjuder gärna in till diskussion och låter medarbetare utmana mina idéer.", r:false},
+      {t:"Jag förväntar mig att medarbetarna respekterar mitt beslut utan att jag alltid måste förklara varför.", r:true}
+    ]
+  },
+  {
+    id:'mikro', name:'Risk för Mikromanagement', subtitle:'Kontrollbehov under stress',
+    color:'#bf7c7c', colorRgb:'191,124,124', icon:'🔬', type:'risk',
+    questions:[
+      {t:"Jag känner ett starkt behov av att hålla mig informerad om detaljerna i mina medarbetares dagliga arbete.", r:false},
+      {t:"Jag har inga problem med att delegera viktiga arbetsuppgifter utan att lägga mig i hur de utförs.", r:true},
+      {t:"Om ett resultat ska bli perfekt känner jag ofta att jag måste göra sista touchen själv.", r:false},
+      {t:"Jag uppmuntrar mina medarbetare att fatta egna beslut, även om det innebär att de gör misstag.", r:true},
+      {t:"Jag blir stressad om jag inte har full insyn i alla pågående projekt i bolaget.", r:false},
+      {t:"Jag litar på att mitt team har den kompetens som krävs för att lösa sina uppgifter autonomt.", r:true},
+      {t:"Jag har kommit på mig själv med att skriva om rapporter eller material som mina medarbetare har tagit fram.", r:false},
+      {t:"Jag tycker det är viktigare att målet nås än att medarbetarna följer exakt den metod jag hade tänkt mig.", r:true},
+      {t:"Jag vill att mina medarbetare stämmer av med mig innan de gör större ändringar i sina projekt.", r:false},
+      {t:"Jag släpper gärna ifrån mig det operativa ansvaret för att helt kunna fokusera på strategiska frågor.", r:true}
+    ]
+  },
+  {
+    id:'prestige', name:'Risk för Prestige och Arrogans', subtitle:'Defensivitet vid motgångar',
+    color:'#bf9b7c', colorRgb:'191,155,124', icon:'👑', type:'risk',
+    questions:[
+      {t:"Jag har ibland svårt att erkänna inför mitt team om jag har fattat ett felaktigt beslut.", r:false},
+      {t:"Jag tar gärna emot råd från personer som har mindre erfarenhet än vad jag har.", r:true},
+      {t:"När ett projekt misslyckas beror det oftast på att andra inte har levererat vad de lovat.", r:false},
+      {t:"Jag ber om ursäkt till mina medarbetare om mitt humör eller mitt agerande har varit bristfälligt.", r:true},
+      {t:"Jag anser att mina strategiska visioner oftast är överlägsna de förslag som kommer från styrelsen.", r:false},
+      {t:"Jag söker aktivt efter motargument till mina egna idéer för att testa om de håller.", r:true},
+      {t:"Jag blir djupt sårad eller defensiv när mina beslut ifrågasätts på osakliga grunder.", r:false},
+      {t:"Jag har inga problem med att ändra åsikt offentligt om någon presenterar bättre data än jag har.", r:true},
+      {t:"Jag känner att jag måste framstå som ofelbar för att behålla min auktoritet som ledare.", r:false},
+      {t:"Jag lyfter hellre fram teamets insats än min egen personliga roll när bolaget når framgång.", r:true}
+    ]
+  },
+  {
+    id:'beslut', name:'Risk för Beslutsångest', subtitle:'Handlingsförlamning vid ökad risk',
+    color:'#7cbfbf', colorRgb:'124,191,191', icon:'⚖️', type:'risk',
+    questions:[
+      {t:"Jag skjuter ibland upp svåra samtal med medarbetare i hopp om att situationen ska lösa sig själv.", r:false},
+      {t:"Jag fattar obekväma beslut snabbt, även om det innebär att jag blir tillfälligt ogillad av gruppen.", r:true},
+      {t:"Jag samlar gärna på mig mer data och gör ytterligare analyser för att vara helt säker innan jag agerar.", r:false},
+      {t:"Jag tar konflikter direkt när de uppstår istället för att låta dem ligga och gro.", r:true},
+      {t:"När riskerna är höga föredrar jag att dela beslutsansvaret med så många som möjligt.", r:false},
+      {t:"Jag har lätt för att skära av en diskussion och fatta ett beslut när tiden kräver det.", r:true},
+      {t:"Jag märker att jag drar mig för att leverera negativa besked till styrelsen eller ägarna.", r:false},
+      {t:"Jag driver igenom nödvändiga förändringar även om jag vet att det kommer att skapa oro i organisationen.", r:true},
+      {t:"Jag tenderar att vänta och se hur marknaden reagerar innan jag lanserar en helt ny strategi.", r:false},
+      {t:"Jag känner mig trygg i att navigera och agera i situationer där jag har bristfällig information.", r:true}
+    ]
+  },
+  {
+    id:'vision', name:'Visionär Impulsivitet', subtitle:'Kontra exekutiv realism',
+    color:'#bf7cbf', colorRgb:'191,124,191', icon:'🌌', type:'risk',
+    questions:[
+      {t:"Jag dras till storslagna och visionära idéer och tappar snabbt intresset för det vardagliga arbetet.", r:false},
+      {t:"Jag är noga med att säkerställa att vi har de ekonomiska resurserna innan vi startar nya projekt.", r:true},
+      {t:"Jag ändrar ofta bolagets prioriteringar när jag ser nya, spännande marknadsmöjligheter.", r:false},
+      {t:"Jag tycker att ett bolags lönsamhet här och nu är viktigare än att jaga osäkra framtidsdrömmar.", r:true},
+      {t:"Jag startar gärna upp flera initiativ samtidigt för att se vilka som bär frukt.", r:false},
+      {t:"Jag är disciplinerad med att hålla fast vid vår långsiktiga affärsplan, även när det dyker upp sidospår.", r:true},
+      {t:"Jag formulerar ofta strategier som mina medarbetare har svårt att bryta ner i praktisk handling.", r:false},
+      {t:"Jag värdesätter stabilitet och förutsägbarhet högre än konstant förändring och innovation.", r:true},
+      {t:"Jag blir lätt uttråkad om verksamheten rullar på i ett lugnt och stabilt tempo.", r:false},
+      {t:"Jag analyserar alltid kapaciteten hos mina medarbetare innan jag lovar kunden en ny leverans.", r:true}
+    ]
+  }
+];
+
+const OPT_LABELS = ['Instämmer inte alls','Instämmer inte','Instämmer','Instämmer helt'];
+let questionIndex = 0;
+
+// Build survey HTML – flat list, no section headers
+function buildSurvey(){
+  const survey = document.getElementById('survey');
+  const wrap = document.createElement('div');
+  wrap.className = 'section';
+  THEMES.forEach((theme, ti) => {
+    theme.questions.forEach((q, qi) => {
+      const globalIdx = ti*10 + qi;
+      const qDiv = document.createElement('div');
+      qDiv.className = 'question';
+      qDiv.innerHTML = `<div class="question-text"><span class="question-num">${globalIdx+1}.</span>${q.t}</div>`;
+      const optDiv = document.createElement('div');
+      optDiv.className = 'options-4';
+      OPT_LABELS.forEach((label, vi) => {
+        const val = vi+1;
+        const lbl = document.createElement('label');
+        lbl.className = 'opt-label';
+        lbl.style.setProperty('--dim-color', 'var(--accent)');
+        lbl.innerHTML = `
+          <input type="radio" name="q${globalIdx}" value="${val}" onchange="onAnswer('${theme.id}',${globalIdx})">
+          <div class="opt-dot"></div>
+          <span class="opt-text">${label}</span>`;
+        optDiv.appendChild(lbl);
+      });
+      qDiv.appendChild(optDiv);
+      wrap.appendChild(qDiv);
+    });
+  });
+  survey.appendChild(wrap);
+}
+
+function onAnswer(themeId, idx){
+  // Mark selected
+  const radios = document.querySelectorAll(`[name="q${idx}"]`);
+  radios.forEach(r => {
+    r.closest('.opt-label').classList.toggle('selected', r.checked);
+  });
+  updateProgress();
+}
+
+function updateProgress(){
+  let answered = 0;
+  for(let i=0;i<80;i++){
+    if(document.querySelector(`[name="q${i}"]:checked`)) answered++;
+  }
+  document.getElementById('progressFill').style.width = (answered/80*100)+'%';
+}
+
+function getScores(){
+  const scores = {};
+  THEMES.forEach(theme => { scores[theme.id] = 0; });
+  THEMES.forEach((theme, ti) => {
+    let sum = 0;
+    theme.questions.forEach((q, qi) => {
+      const idx = ti*10+qi;
+      const el = document.querySelector(`[name="q${idx}"]:checked`);
+      let val = el ? parseInt(el.value) : 2;
+      if(q.r) val = 5 - val; // reverse: 1↔4, 2↔3
+      sum += val;
+    });
+    // score range 10–40, map to 0–100
+    scores[theme.id] = Math.round((sum - 10) / 30 * 100);
+  });
+  return scores;
+}
+
+function submitTest(){
+  let unanswered = 0;
+  for(let i=0;i<80;i++){
+    if(!document.querySelector(`[name="q${i}"]:checked`)) unanswered++;
+  }
+  if(unanswered > 0){
+    const err = document.getElementById('errorMsg');
+    err.style.display = 'block';
+    err.textContent = `Svara på alla frågor. Du har ${unanswered} frågor kvar.`;
+    return;
+  }
+  document.getElementById('errorMsg').style.display = 'none';
+  const scores = getScores();
+  showResults(scores);
+}
+
+function showResults(scores){
+  lastScores = scores;
+  document.getElementById('survey').style.display = 'none';
+  document.querySelector('.submit-wrap').style.display = 'none';
+  document.querySelector('.progress-bar').style.display = 'none';
+  document.getElementById('results').style.display = 'block';
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  drawRadar(scores);
+  buildBars(scores);
+  buildInsight(scores);
+  runAI(scores);
+}
+
+function drawRadar(scores){
+  const canvas = document.getElementById('radarCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2;
+  const R = Math.min(W,H)*0.35;
+  const n = THEMES.length;
+  ctx.clearRect(0,0,W,H);
+
+  // Grid rings
+  [0.25,0.5,0.75,1.0].forEach(frac => {
+    ctx.beginPath();
+    for(let i=0;i<n;i++){
+      const angle = (i/n)*Math.PI*2 - Math.PI/2;
+      const r = R*frac;
+      const x = cx + Math.cos(angle)*r, y = cy + Math.sin(angle)*r;
+      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  });
+
+  // Spokes
+  THEMES.forEach((_,i) => {
+    const angle = (i/n)*Math.PI*2 - Math.PI/2;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.lineTo(cx+Math.cos(angle)*R, cy+Math.sin(angle)*R);
+    ctx.strokeStyle='rgba(255,255,255,0.06)';
+    ctx.lineWidth=1;
+    ctx.stroke();
+  });
+
+  // Data polygon
+  ctx.beginPath();
+  THEMES.forEach((theme,i) => {
+    const angle = (i/n)*Math.PI*2 - Math.PI/2;
+    const r = R * (scores[theme.id]/100);
+    const x = cx+Math.cos(angle)*r, y = cy+Math.sin(angle)*r;
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(201,168,76,0.12)';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(201,168,76,0.7)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Dots
+  THEMES.forEach((theme,i) => {
+    const angle = (i/n)*Math.PI*2 - Math.PI/2;
+    const r = R * (scores[theme.id]/100);
+    const x = cx+Math.cos(angle)*r, y = cy+Math.sin(angle)*r;
+    ctx.beginPath();
+    ctx.arc(x,y,4,0,Math.PI*2);
+    ctx.fillStyle = theme.color;
+    ctx.fill();
+  });
+
+  // Labels
+  const labelR = R + 42;
+  ctx.font = '10px DM Sans, sans-serif';
+  THEMES.forEach((theme,i) => {
+    const angle = (i/n)*Math.PI*2 - Math.PI/2;
+    const lx = cx+Math.cos(angle)*labelR;
+    const ly = cy+Math.sin(angle)*labelR;
+    const cosA = Math.cos(angle);
+    ctx.textAlign = cosA > 0.3 ? 'left' : cosA < -0.3 ? 'right' : 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = theme.color;
+    // Short label
+    const parts = theme.name.split(' ');
+    const shortLabel = parts.length > 2 ? parts.slice(0,2).join(' ') : theme.name;
+    ctx.fillText(shortLabel, lx, ly);
+  });
+}
+
+function buildBars(scores){
+  const wrap = document.getElementById('dimBarsWrap');
+  wrap.innerHTML = '';
+
+  ['styrka','risk'].forEach(type => {
+    const label = document.createElement('div');
+    label.className = 'result-cat-label';
+    label.textContent = type==='styrka' ? 'Ledarskapsstyrkor' : 'Riskindikatorer (mörkersida)';
+    wrap.appendChild(label);
+
+    THEMES.filter(t=>t.type===type).forEach(theme => {
+      const pct = scores[theme.id];
+      const div = document.createElement('div');
+      div.className = 'dim-bar-wrap';
+      div.innerHTML = `
+        <div class="dim-bar-header">
+          <span class="dim-bar-name">${theme.icon} ${theme.name}</span>
+          <span class="dim-bar-pct">${pct}%</span>
+        </div>
+        <div class="dim-bar-track">
+          <div class="dim-bar-fill" style="width:0%;background:${theme.color}" data-pct="${pct}"></div>
+        </div>`;
+      wrap.appendChild(div);
+    });
+  });
+
+  // Animate bars
+  setTimeout(() => {
+    wrap.querySelectorAll('.dim-bar-fill').forEach(el => {
+      el.style.width = el.dataset.pct + '%';
+    });
+  }, 100);
+}
+
+function buildInsight(scores){
+  const grid = document.getElementById('insightGrid');
+  grid.innerHTML = '';
+
+  // Strongest strength
+  const strengths = THEMES.filter(t=>t.type==='styrka');
+  const topStrength = strengths.reduce((a,b)=>scores[a.id]>scores[b.id]?a:b);
+  const lowStrength = strengths.reduce((a,b)=>scores[a.id]<scores[b.id]?a:b);
+  // Highest risk
+  const risks = THEMES.filter(t=>t.type==='risk');
+  const topRisk = risks.reduce((a,b)=>scores[a.id]>scores[b.id]?a:b);
+  const lowRisk = risks.reduce((a,b)=>scores[a.id]<scores[b.id]?a:b);
+
+  const items = [
+    {label:'Starkaste styrka', value:`${topStrength.icon} ${topStrength.name}`, color:topStrength.color},
+    {label:'Utvecklingsområde', value:`${lowStrength.icon} ${lowStrength.name}`, color:lowStrength.color},
+    {label:'Högsta riskindikator', value:`${topRisk.icon} ${topRisk.name}`, color:topRisk.color},
+    {label:'Lägsta riskindikator', value:`${lowRisk.icon} ${lowRisk.name}`, color:lowRisk.color},
+  ];
+
+  items.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'insight-item';
+    div.innerHTML = `
+      <div class="insight-item-label">${item.label}</div>
+      <div class="insight-item-value" style="color:${item.color}">${item.value}</div>`;
+    grid.appendChild(div);
+  });
+}
+
+async function runAI(scores){
+  const scoreLines = THEMES.map(t =>
+    `${t.name} (${t.type==='styrka'?'Styrka':'Riskindikator'}): ${scores[t.id]}%`
+  ).join('\n');
+
+  const prompt = `Du är en erfaren executive coach och organisationspsykolog specialiserad på SMF-ledare och VD:ar för bolag med 5–25 anställda. Du har djup kännedom om Hogans ledarskapsmodell, derailers och dunkla sidor i ledarskap.
+
+Nedan är resultaten från en ledarskapsanalys (VD-profil) inspirerad av Hogan-modellen. Skalan är 0–100 % per dimension.
+
+STYRKOR (högt = stark förmåga):
+- Självstart och Driv (autonomi/initiativkraft): ${scores.driv}%
+- Struktur och Uthållighet (förmåga att slutföra): ${scores.struktur}%
+- Resiliens och Emotionell Stabilitet (stresstålighet): ${scores.resiliens}%
+- Kommunikativ Smidighet (ledarskap i liten grupp): ${scores.kommunikation}%
+
+RISKINDIKATORER / MÖRKERSIDA (högt = ökad risk för derailment):
+- Risk för Mikromanagement (kontrollbehov under stress): ${scores.mikro}%
+- Risk för Prestige och Arrogans (defensivitet vid motgångar): ${scores.prestige}%
+- Risk för Beslutsångest och Undvikande (handlingsförlamning): ${scores.beslut}%
+- Visionär Impulsivitet kontra Exekutiv Realism (fokusförlust): ${scores.vision}%
+
+Skriv en skarp, personlig och ärlig analys på svenska med max 400 ord. Strukturen:
+
+1. **Ledarskapsprofil** – Beskriv ledarens övergripande profil baserat på styrkornas mönster. Vad är de naturliga talangerna?
+
+2. **Mörkersidorna** – Peka ut de 1–2 tydligaste risksignalerna. Vad händer när ledarskapet utsätts för stress eller motgångar? Ge ett konkret beteendeexempel.
+
+3. **Skärningspunkten** – Hur påverkar mörkersidesprofilens interaktion med styrkorna? Är t.ex. högt driv + hög visionär impulsivitet en kombination som kan vara farlig?
+
+4. **En åtgärd** – En specifik, konkret sak denna ledare bör börja göra (eller sluta göra) de närmaste 90 dagarna.
+
+Var direkt, akademiskt förankrad men utan jargong. Undvik smicker.
+
+VIKTIGT OM TYPOGRAFI: Använd ALDRIG långt tankstreck (em-dash, Unicode U+2014). Använd istället vanligt bindestreck (-), kort tankstreck (–) eller skriv om meningen. Detta är ett absolut krav.`;
+
+  try {
+    const resp = await fetch('/api/analyze', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({prompt, max_tokens:900})
+    });
+    const data = await resp.json();
+    if(!resp.ok) throw new Error(data?.error || `API-fel ${resp.status}`);
+    const rawText = data.text || 'Analysen kunde inte genereras.';
+    const text = stripEmDash(rawText);
+    aiRawText = text;
+    document.getElementById('aiBody').innerHTML = formatAI(text);
+  } catch(e) {
+    document.getElementById('aiBody').innerHTML = '<p style="color:#bf7c7c">Kunde inte nå AI-tjänsten. Kontrollera att API-nyckeln är giltig.</p>';
+  }
+}
+
+// Saneringsskydd: ta bort långa tankstreck (em-dash) helt, oavsett AI-output
+function stripEmDash(text){
+  return text
+    .replace(/\s*—\s*/g, ' – ')  // — (med ev. omgivande blanksteg) -> spaceat –
+    .replace(/—/g, '-')               // kvarvarande em-dash -> bindestreck
+    .replace(/―/g, '-');              // horizontal bar -> bindestreck
+}
+
+function formatAI(text){
+  return stripEmDash(text)
+    .replace(/^\s*-{2,}\s*$/gm,'')
+    .replace(/^#{1,3}\s*(.+)$/gm,'<h3>$1</h3>')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .split('\n\n')
+    .map(p=>p.trim())
+    .filter(p=>p)
+    .map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`)
+    .join('');
+}
+
+function openPDF(){
+  if(!lastScores) return;
+  const dateStr = new Date().toLocaleDateString('sv-SE',{year:'numeric',month:'long',day:'numeric'});
+
+  const buildRows = type => THEMES.filter(t=>t.type===type).map(t=>{
+    const pct = lastScores[t.id];
+    return `<div class="pdf-score-row">
+      <span class="pdf-score-name">${t.icon} ${t.name}</span>
+      <div class="pdf-score-bar-wrap"><div class="pdf-score-bar" style="width:${pct}%;background:${t.color}"></div></div>
+      <span class="pdf-score-val" style="color:${t.color}">${pct}%</span>
+    </div>`;
+  }).join('');
+
+  const analysisHtml = aiRawText
+    ? aiRawText
+        .replace(/^\s*-{2,}\s*$/gm,'')          // ta bort separatorrader (-- / ---)
+        .replace(/^#{1,3}\s*(.+)$/gm,'<h3>$1</h3>')
+        .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g,'<em>$1</em>')        // enkel asterisk → kursiv
+        .replace(/^[\-•]\s+(.+)$/gm,'<li>$1</li>')  // kräver mellanslag → äkta punktlista
+        .replace(/(<li>[\s\S]+?<\/li>)/g,m=>`<ul>${m}</ul>`)
+        .replace(/<\/ul>\s*<ul>/g,'')
+        .split('\n').map(l=>(!l.startsWith('<')&&l.trim())?`<p>${l}</p>`:l).join('\n')
+    : '<p><em>AI-analysen kunde inte hämtas.</em></p>';
+
+  document.getElementById('pdf-body').innerHTML = `
+    <div class="pdf-header">
+      <h1>HOGAN-Profil · Ledarskapsrapport</h1>
+      <p>${dateStr} &nbsp;·&nbsp; Konfidentiellt</p>
+    </div>
+    <div class="pdf-section-title">Resultatsammanfattning</div>
+    <div class="pdf-cat-label">Ledarskapsstyrkor</div>
+    ${buildRows('styrka')}
+    <div class="pdf-cat-label">Riskindikatorer (mörkersida)</div>
+    ${buildRows('risk')}
+    <div class="pdf-section-title">AI-analys</div>
+    <div class="pdf-analysis">${analysisHtml}</div>
+    <div class="pdf-footer">
+      <span>HOGAN-Profil · Ledarskapsanalys</span>
+      <span>${dateStr}</span>
+    </div>`;
+
+  document.getElementById('pdf-overlay').style.display = 'block';
+  document.getElementById('pdf-overlay').scrollTop = 0;
+}
+
+function closePDF(){
+  document.getElementById('pdf-overlay').style.display = 'none';
+}
+
+// Init
+buildSurvey();
+</script>
+</body>
+</html>
