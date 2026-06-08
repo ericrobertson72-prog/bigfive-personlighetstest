@@ -155,13 +155,15 @@
   .pdf-footer{margin-top:36px;padding-top:12px;border-top:1px solid #ddd;font-size:10px;color:#aaa;display:flex;justify-content:space-between;}
 
   @media print{
-    body>*{display:none!important;}
+    .container{display:none!important;}
+    body::before{display:none!important;}
     #pdf-overlay{display:block!important;position:static!important;background:none!important;padding:0!important;}
     .pdf-topbar{display:none!important;}
     .pdf-modal{box-shadow:none!important;border-radius:0!important;}
     .pdf-body{padding:20px 30px!important;}
     .pdf-header{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
     .pdf-score-bar{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .pdf-section-title{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   }
 
   @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
@@ -476,14 +478,13 @@ const insightLevels=[
 
 function checkName(){
   const v=document.getElementById('user-name').value.trim();
-  const k=document.getElementById('api-key').value.trim();
-  document.getElementById('btn-start').disabled=v.length<2||k.length<10;
+  document.getElementById('btn-start').disabled=v.length<2;
 }
 
 function startTest(){
   userName=document.getElementById('user-name').value.trim();
   apiKey=document.getElementById('api-key').value.trim();
-  if(userName.length<2||apiKey.length<10)return;
+  if(userName.length<2)return;
   document.getElementById('intro-screen').style.display='none';
   document.getElementById('form-section').style.display='block';
   window.scrollTo({top:0,behavior:'smooth'});
@@ -558,6 +559,14 @@ async function showResults(){
 }
 
 async function fetchAIAnalysis(scores){
+  if(!apiKey){
+    document.getElementById('ai-loading').style.display='none';
+    const errEl=document.getElementById('ai-error');
+    errEl.style.display='block';
+    errEl.textContent='Ingen API-nyckel angiven — AI-analys hoppas över. Fyll i din Anthropic API-nyckel på startsidan för att aktivera analysen.';
+    document.getElementById('btn-pdf').disabled=false;
+    return;
+  }
   const prompt=`Du är leg. psykolog och senior personlighetskonsult med över 20 års erfarenhet av djupintervjuer, ledarskapscoachning och personlighetspsykologi baserad på Big Five-modellen (OCEAN). Du kombinerar vetenskaplig precision med värme och ärlighet.
 
 Klientens namn: ${userName}
@@ -596,12 +605,21 @@ Svara ENBART med analysen. Börja direkt med första rubriken.`;
   try{
     const res=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
-      headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-      body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:1000,messages:[{role:"user",content:prompt}]})
+      headers:{
+        "Content-Type":"application/json",
+        "x-api-key":apiKey,
+        "anthropic-version":"2023-06-01",
+        "anthropic-dangerous-direct-browser-access":"true"
+      },
+      body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:1200,messages:[{role:"user",content:prompt}]})
     });
     const data=await res.json();
+    if(!res.ok){
+      const msg=data?.error?.message||`API-fel ${res.status}`;
+      throw new Error(msg);
+    }
     const text=data.content?.find(b=>b.type==='text')?.text||'';
-    if(!text)throw new Error('Tomt svar');
+    if(!text)throw new Error('API returnerade tomt svar');
     aiRawText=text;
     document.getElementById('ai-loading').style.display='none';
     const contentEl=document.getElementById('ai-content');
@@ -612,23 +630,34 @@ Svara ENBART med analysen. Börja direkt med första rubriken.`;
     document.getElementById('ai-loading').style.display='none';
     const errEl=document.getElementById('ai-error');
     errEl.style.display='block';
-    errEl.textContent='Kunde inte hämta AI-analysen just nu. Du kan ändå ladda ner PDF med dina poäng.';
+    errEl.textContent=`AI-analys misslyckades: ${e.message}`;
     document.getElementById('btn-pdf').disabled=false;
   }
 }
 
 function renderMarkdown(md){
-  return md
-    .replace(/^## (.+)$/gm,'<h4>$1</h4>')
-    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/^[\-•] (.+)$/gm,'<li>$1</li>')
-    .replace(/(<li>[\s\S]+?<\/li>)/g,m=>`<ul>${m}</ul>`)
-    .replace(/<\/ul>\s*<ul>/g,'')
-    .split('\n').map(line=>{
-      if(line.startsWith('<h4>')||line.startsWith('<ul>')||line.startsWith('<li>'))return line;
-      if(line.trim()&&!line.startsWith('<'))return `<p>${line}</p>`;
-      return line;
-    }).join('\n');
+  const lines=md.split('\n');
+  const out=[];
+  let inList=false;
+  for(const raw of lines){
+    const line=raw.trimEnd();
+    if(/^## (.+)/.test(line)){
+      if(inList){out.push('</ul>');inList=false;}
+      out.push(`<h4>${line.replace(/^## /,'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')}</h4>`);
+    } else if(/^[\-•*] (.+)/.test(line)||/^\d+\. (.+)/.test(line)){
+      const text=line.replace(/^[\-•*\d.] +/,'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+      if(!inList){out.push('<ul>');inList=true;}
+      out.push(`<li>${text}</li>`);
+    } else if(line.trim()===''){
+      if(inList){out.push('</ul>');inList=false;}
+      out.push('');
+    } else {
+      if(inList){out.push('</ul>');inList=false;}
+      out.push(`<p>${line.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')}</p>`);
+    }
+  }
+  if(inList)out.push('</ul>');
+  return out.join('\n');
 }
 
 function drawRadar(scores){
@@ -701,7 +730,7 @@ function closePDF(){
 }
 
 function resetTest(){
-  touched.clear();aiRawText='';lastScores=null;
+  touched.clear();aiRawText='';lastScores=null;apiKey='';
   document.querySelectorAll('.q-slider').forEach(el=>{el.value=5;el.style.background='';});
   document.querySelectorAll('.slider-value').forEach(el=>{el.textContent='Flytta reglaget';el.classList.add('untouched');});
   document.getElementById('ai-loading').style.display='flex';
@@ -709,6 +738,7 @@ function resetTest(){
   document.getElementById('ai-error').style.display='none';
   document.getElementById('btn-pdf').disabled=true;
   document.getElementById('user-name').value='';
+  document.getElementById('api-key').value='';
   document.getElementById('btn-start').disabled=true;
   countAnswered();
   document.getElementById('results').style.display='none';
