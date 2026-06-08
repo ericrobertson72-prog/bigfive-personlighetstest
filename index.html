@@ -194,8 +194,6 @@
       <p>Ange ditt namn så att din rapport kan personaliseras. Namnet används enbart i din nedladdningsbara PDF.</p>
       <label class="name-label" for="user-name">Ditt namn</label>
       <input class="name-input" id="user-name" type="text" placeholder="Förnamn Efternamn" oninput="checkName()" onkeydown="if(event.key==='Enter')startTest()">
-      <label class="name-label" for="api-key">Anthropic API-nyckel <span style="color:var(--muted);font-size:11px;text-transform:none;letter-spacing:0">(krävs för AI-analys)</span></label>
-      <input class="name-input" id="api-key" type="password" placeholder="sk-ant-..." oninput="checkName()">
       <button class="btn-start" id="btn-start" onclick="startTest()" disabled>Starta testet →</button>
     </div>
   </div>
@@ -432,7 +430,7 @@
 const touched = new Set();
 const TOTAL = 20;
 let userName = '';
-let apiKey = '';
+let apiKey = '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';
 let lastScores = null;
 let aiRawText = '';
 
@@ -483,7 +481,7 @@ function checkName(){
 
 function startTest(){
   userName=document.getElementById('user-name').value.trim();
-  apiKey=document.getElementById('api-key').value.trim();
+  // apiKey is hardcoded
   if(userName.length<2)return;
   document.getElementById('intro-screen').style.display='none';
   document.getElementById('form-section').style.display='block';
@@ -611,7 +609,7 @@ Svara ENBART med analysen. Börja direkt med första rubriken.`;
         "anthropic-version":"2023-06-01",
         "anthropic-dangerous-direct-browser-access":"true"
       },
-      body:JSON.stringify({model:"claude-haiku-4-5",max_tokens:1200,messages:[{role:"user",content:prompt}]})
+      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1200,messages:[{role:"user",content:prompt}]})
     });
     const data=await res.json();
     if(!res.ok){
@@ -730,7 +728,7 @@ function closePDF(){
 }
 
 function resetTest(){
-  touched.clear();aiRawText='';lastScores=null;apiKey='';
+  touched.clear();aiRawText='';lastScores=null;
   document.querySelectorAll('.q-slider').forEach(el=>{el.value=5;el.style.background='';});
   document.querySelectorAll('.slider-value').forEach(el=>{el.textContent='Flytta reglaget';el.classList.add('untouched');});
   document.getElementById('ai-loading').style.display='flex';
@@ -738,7 +736,6 @@ function resetTest(){
   document.getElementById('ai-error').style.display='none';
   document.getElementById('btn-pdf').disabled=true;
   document.getElementById('user-name').value='';
-  document.getElementById('api-key').value='';
   document.getElementById('btn-start').disabled=true;
   countAnswered();
   document.getElementById('results').style.display='none';
