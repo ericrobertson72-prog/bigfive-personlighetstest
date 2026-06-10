@@ -168,6 +168,7 @@ body::before{content:'';position:fixed;inset:0;background:
   <div id="survey"></div>
 
   <div class="submit-wrap">
+    <button type="button" onclick="autofill()" style="margin-bottom:12px;padding:8px 20px;background:#444;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">Fyll i automatiskt (test)</button><br>
     <button class="btn-primary" id="submitBtn" onclick="submitTest()">Generera min profil</button>
     <div class="error-msg" id="errorMsg">Svara på alla frågor innan du fortsätter.</div>
   </div>
@@ -421,6 +422,14 @@ function getScores(){
     scores[theme.id] = Math.round((sum - 10) / 30 * 100);
   });
   return scores;
+}
+
+function autofill(){
+  for(let i=0;i<80;i++){
+    const val = (i%4)+1;
+    const el = document.querySelector(`[name="q${i}"][value="${val}"]`);
+    if(el) el.checked = true;
+  }
 }
 
 function submitTest(){
