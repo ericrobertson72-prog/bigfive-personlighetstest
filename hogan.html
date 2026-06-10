@@ -635,7 +635,7 @@ VIKTIGT OM TYPOGRAFI: Använd ALDRIG långt tankstreck (em-dash, Unicode U+2014)
     const resp = await fetch('/api/analyze', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({prompt, max_tokens:900})
+      body: JSON.stringify({prompt, max_tokens:600})
     });
     const data = await resp.json();
     if(!resp.ok) throw new Error(data?.error || `API-fel ${resp.status}`);
