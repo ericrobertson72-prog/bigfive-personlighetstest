@@ -606,6 +606,7 @@ function buildInsight(scores){
 }
 
 async function runAI(scores){
+  console.log('runAI called, scores:', JSON.stringify(scores));
   const scoreLines = THEMES.map(t =>
     `${t.name} (${t.type==='styrka'?'Styrka':'Riskindikator'}): ${scores[t.id]}%`
   ).join('\n');
