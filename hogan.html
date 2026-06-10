@@ -610,7 +610,7 @@ async function runAI(scores){
     `${t.name} (${t.type==='styrka'?'Styrka':'Riskindikator'}): ${scores[t.id]}%`
   ).join('\n');
 
-  const prompt = `Du är en erfaren executive coach och organisationspsykolog specialiserad på SMF-ledare och VD:ar för bolag med 5–25 anställda. Du har djup kännedom om Hogans ledarskapsmodell, derailers och dunkla sidor i ledarskap.
+  const aiPrompt = `Du är en erfaren executive coach och organisationspsykolog specialiserad på SMF-ledare och VD:ar för bolag med 5–25 anställda. Du har djup kännedom om Hogans ledarskapsmodell, derailers och dunkla sidor i ledarskap.
 
 Nedan är resultaten från en ledarskapsanalys (VD-profil) inspirerad av Hogan-modellen. Skalan är 0–100 % per dimension.
 
@@ -644,7 +644,7 @@ VIKTIGT OM TYPOGRAFI: Använd ALDRIG långt tankstreck (em-dash, Unicode U+2014)
     const resp = await fetch('/api/analyze', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({prompt, max_tokens:600})
+      body: JSON.stringify({prompt: aiPrompt, max_tokens:600})
     });
     const data = await resp.json();
     if(!resp.ok) throw new Error(data?.error || `API-fel ${resp.status}`);
