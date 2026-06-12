@@ -162,6 +162,7 @@ body::before{content:'';position:fixed;inset:0;background:
     <div class="header-badge">Ledarskapsanalys</div>
     <h1>HOGAN-Profil</h1>
     <p>Svara utifrån hur du faktiskt agerar – inte hur du önskar att du agerade.</p>
+    <input id="user-name" type="text" placeholder="Ditt namn" oninput="document.getElementById('submitBtn').disabled=this.value.trim().length<2" style="margin-top:20px;padding:12px 18px;border-radius:100px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:var(--text);font-size:14px;width:100%;max-width:320px;outline:none;text-align:center;">
   </div>
 
   <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
@@ -169,7 +170,7 @@ body::before{content:'';position:fixed;inset:0;background:
   <div id="survey"></div>
 
   <div class="submit-wrap">
-<button class="btn-primary" id="submitBtn" onclick="submitTest()">Generera min profil</button>
+<button class="btn-primary" id="submitBtn" onclick="submitTest()" disabled>Generera min profil</button>
     <div class="error-msg" id="errorMsg">Svara på alla frågor innan du fortsätter.</div>
   </div>
 
@@ -224,6 +225,7 @@ body::before{content:'';position:fixed;inset:0;background:
 // API-nyckeln ligger numera server-side (Cloudflare secret), aldrig i klienten.
 let lastScores = null;
 let aiRawText = '';
+let userName = '';
 
 const THEMES = [
   {
@@ -426,6 +428,7 @@ function getScores(){
 }
 
 function submitTest(){
+  userName = document.getElementById('user-name').value.trim();
   let unanswered = 0;
   for(let i=0;i<80;i++){
     if(!document.querySelector(`[name="q${i}"]:checked`)) unanswered++;
@@ -644,7 +647,7 @@ VIKTIGT OM TYPOGRAFI: Använd ALDRIG långt tankstreck (em-dash, Unicode U+2014)
     const rawText = data.text || 'Analysen kunde inte genereras.';
     const text = stripEmDash(rawText);
     aiRawText = text;
-    fetch('/api/save-result',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'Hogan',test_type:'Hogan',report:text})});
+    fetch('/api/save-result',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:userName,test_type:'Hogan',report:text})});
     document.getElementById('aiBody').innerHTML = formatAI(text);
   } catch(e) {
     document.getElementById('aiBody').innerHTML = `<p style="color:#bf7c7c">Fel: ${e.message}</p>`;
