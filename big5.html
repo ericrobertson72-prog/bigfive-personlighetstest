@@ -616,7 +616,7 @@ VIKTIGT OM TYPOGRAFI: Använd ALDRIG långt tankstreck (em-dash, Unicode U+2014)
     const text=stripEmDash(data.text||'');
     if(!text)throw new Error('API returnerade tomt svar');
     aiRawText=text;
-    fetch('/api/save-result',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:userName,test_type:'Big Five',report:text})});
+    fetch('/api/save-result',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:userName,test_type:'Big Five',report:text,scores:lastScores})});
     document.getElementById('ai-loading').style.display='none';
     const contentEl=document.getElementById('ai-content');
     contentEl.style.display='block';

@@ -106,6 +106,45 @@ function render() {
   el.innerHTML = html;
 }
 
+function buildScoreBars(r) {
+  const s = r.scores;
+  if (!s) return '';
+
+  const row = (name, pct, color) => `
+    <div class="pdf-score-row">
+      <span class="pdf-score-name">${name}</span>
+      <div class="pdf-score-bar-wrap"><div class="pdf-score-bar" style="width:${pct}%;background:${color}"></div></div>
+      <span class="pdf-score-val" style="color:${color}">${pct}%</span>
+    </div>`;
+
+  if (r.test_type === 'Big Five') {
+    const traits = [['O','Öppenhet','#7c9bbf'],['C','Samvetsgrannhet','#7bbf9b'],['E','Extraversion','#bf9b7c'],['A','Vänlighet','#bf7c9b'],['N','Emotionell stabilitet','#9b7cbf'],['S','Självinsikt','#c9a84c']];
+    return traits.map(([k,n,c]) => row(n, Math.round((s[k]||0)/10*100), c)).join('');
+  }
+  if (r.test_type === 'DISC') {
+    const traits = [['D','Dominans','#bf7c7c'],['I','Inflytande','#c9a84c'],['S','Stabilitet','#7bbf9b'],['C','Noggrannhet','#7c9bbf']];
+    return traits.map(([k,n,c]) => row(n, Math.round((s[k]||0)/10*100), c)).join('');
+  }
+  if (r.test_type === 'MBTI' && s.prefs) {
+    const axes = ['EI','SN','TF','JP'];
+    const labels = {EI:['Introversion','Extraversion'],SN:['Sensing','Intuition'],TF:['Thinking','Feeling'],JP:['Judging','Perceiving']};
+    return axes.map(ax => {
+      const p = s.prefs[ax];
+      if (!p) return '';
+      return row(`${p.letter} · ${labels[ax][p.pct>50?1:0]}`, p.pct, '#c9a84c');
+    }).join('');
+  }
+  if (r.test_type === 'Hogan') {
+    const styrkor = [['driv','Självstart och Driv','#7c9bbf'],['struktur','Struktur och Uthållighet','#7bbf9b'],['resiliens','Resiliens och Stabilitet','#9b7cbf'],['kommunikation','Kommunikativ Smidighet','#c9a84c']];
+    const risker = [['mikro','Risk för Mikromanagement','#bf7c7c'],['prestige','Risk för Prestige och Arrogans','#bf7c7c'],['beslut','Risk för Beslutsångest','#bf9b7c'],['vision','Visionär Impulsivitet','#bf7c9b']];
+    return '<div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:#888;margin:8px 0 4px">Styrkor</div>' +
+      styrkor.map(([k,n,c]) => row(n, s[k]||0, c)).join('') +
+      '<div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:#888;margin:12px 0 4px">Riskindikatorer</div>' +
+      risker.map(([k,n,c]) => row(n, s[k]||0, c)).join('');
+  }
+  return '';
+}
+
 function showPDF(id) {
   const r = allRows.find(x => x.id === id);
   if (!r) return;
@@ -118,11 +157,14 @@ function showPDF(id) {
     .replace(/<\/ul>\s*<ul>/g, '')
     .split('\n').map(l => (!l.startsWith('<') && l.trim()) ? `<p>${l}</p>` : l).join('\n');
 
+  const scoreBars = buildScoreBars(r);
+
   document.getElementById('pdf-body').innerHTML = `
     <div class="pdf-header-block">
       <h1>${esc(r.test_type)} · Rapport</h1>
       <p>${esc(r.name)} &nbsp;·&nbsp; ${dateStr} &nbsp;·&nbsp; Konfidentiellt</p>
     </div>
+    ${scoreBars ? `<div class="pdf-section-title">Resultatsammanfattning</div>${scoreBars}` : ''}
     <div class="pdf-section-title">AI-analys</div>
     ${analysisHtml}
     <div class="pdf-footer">

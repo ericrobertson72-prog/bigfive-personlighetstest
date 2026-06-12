@@ -6,7 +6,7 @@ module.exports = async function handler(req, res) {
   const sql = neon(process.env.DATABASE_URL);
 
   const rows = await sql`
-    SELECT id, name, test_type, report, created_at
+    SELECT id, name, test_type, report, scores, created_at
     FROM results
     ORDER BY created_at DESC
   `;
