@@ -44,10 +44,14 @@
   .pdf-footer{margin-top:40px;padding-top:16px;border-top:1px solid #e0ddf0;display:flex;justify-content:space-between;font-size:10px;color:#8b8a9e;}
 
   @media print{
-    body{display:none!important;}
+    body > *:not(#pdf-overlay){display:none!important;}
     #pdf-overlay{display:block!important;position:static!important;background:none!important;padding:0!important;}
     .pdf-topbar{display:none!important;}
     .pdf-modal{box-shadow:none!important;border-radius:0!important;}
+    .pdf-body{padding:20px 30px!important;}
+    .pdf-header-block{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .pdf-score-bar{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .pdf-section-title{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   }
 </style>
 </head>
