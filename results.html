@@ -34,13 +34,21 @@
   .btn-close-pdf{background:transparent;color:#8b8a9e;font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 18px;border:1px solid rgba(255,255,255,0.1);border-radius:100px;cursor:pointer;}
   .btn-close-pdf:hover{color:#f0eee8;}
   .pdf-body{padding:48px 56px 56px;font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.7;color:#1a1928;}
-  .pdf-header-block{background:#0f0e17;color:#f0eee8;padding:26px 30px;border-radius:8px;margin-bottom:28px;}
-  .pdf-header-block h1{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:#c9a84c;margin-bottom:4px;}
-  .pdf-header-block p{font-size:11px;color:#8b8a9e;}
+  .pdf-header{background:#0f0e17;color:#f0eee8;padding:26px 30px;border-radius:8px;margin-bottom:28px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .pdf-header h1{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:#c9a84c;margin-bottom:4px;}
+  .pdf-header p{font-size:11px;color:#8b8a9e;}
   .pdf-section-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:#0f0e17;margin:26px 0 12px;padding-bottom:6px;border-bottom:2px solid #c9a84c;}
-  .pdf-body h3{font-family:'Cormorant Garamond',serif;font-size:16px;margin:18px 0 6px;}
-  .pdf-body p{margin-bottom:10px;}
-  .pdf-body ul{padding-left:20px;margin-bottom:10px;}
+  .pdf-cat-label{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#888;margin:18px 0 10px;}
+  .pdf-score-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+  .pdf-score-name{width:200px;font-size:11px;color:#444;flex-shrink:0;}
+  .pdf-score-bar-wrap{flex:1;height:8px;background:#e8e6f0;border-radius:4px;overflow:hidden;}
+  .pdf-score-bar{height:100%;border-radius:4px;}
+  .pdf-score-val{width:42px;text-align:right;font-weight:600;font-size:13px;flex-shrink:0;}
+  .pdf-analysis h3{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:600;color:#c9a84c;margin:22px 0 7px;}
+  .pdf-analysis p{font-size:11.5px;color:#333;line-height:1.72;margin-bottom:8px;}
+  .pdf-analysis ul{padding-left:18px;margin-bottom:8px;}
+  .pdf-analysis li{font-size:11.5px;color:#333;line-height:1.7;margin-bottom:4px;}
+  .pdf-analysis strong{color:#1a1928;font-weight:600;}
   .pdf-footer{margin-top:40px;padding-top:16px;border-top:1px solid #e0ddf0;display:flex;justify-content:space-between;font-size:10px;color:#8b8a9e;}
 
   @media print{
@@ -164,13 +172,13 @@ function showPDF(id) {
   const scoreBars = buildScoreBars(r);
 
   document.getElementById('pdf-body').innerHTML = `
-    <div class="pdf-header-block">
+    <div class="pdf-header">
       <h1>${esc(r.test_type)} · Rapport</h1>
       <p>${esc(r.name)} &nbsp;·&nbsp; ${dateStr} &nbsp;·&nbsp; Konfidentiellt</p>
     </div>
     ${scoreBars ? `<div class="pdf-section-title">Resultatsammanfattning</div>${scoreBars}` : ''}
     <div class="pdf-section-title">AI-analys</div>
-    ${analysisHtml}
+    <div class="pdf-analysis">${analysisHtml}</div>
     <div class="pdf-footer">
       <span>${esc(r.test_type)} · ${esc(r.name)}</span>
       <span>${dateStr}</span>
